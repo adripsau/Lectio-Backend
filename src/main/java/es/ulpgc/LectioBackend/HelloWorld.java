@@ -1,17 +1,21 @@
 package es.ulpgc.LectioBackend;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin
 @RestController
+@RequestMapping("/")
 public class HelloWorld {
 
-    @RequestMapping("/")
-    public String index(){
-        return "Hello World";
+    @Autowired
+    private UserRepository userRepository;
+
+    @GetMapping("/users")
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
     }
 
     @RequestMapping("/users")
