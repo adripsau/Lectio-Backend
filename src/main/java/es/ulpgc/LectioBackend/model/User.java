@@ -124,7 +124,7 @@ public class User {
         this.additional = additional;
     }
 
-    public void updateAll(User user){
+    public void updateAll(User user) {
         setFirstName(user.getFirstName());
         setLastName(user.getLastName());
         setEmail(user.getEmail());
