@@ -97,7 +97,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = encodePassword(password);
     }
 
     public String getPhoto() {
@@ -122,5 +122,15 @@ public class User {
 
     public void setAdditional(String additional) {
         this.additional = additional;
+    }
+
+    public void updateAll(User user){
+        setFirstName(user.getFirstName());
+        setLastName(user.getLastName());
+        setEmail(user.getEmail());
+        setPassword(user.getPassword());
+        setPhoto(user.getPhoto());
+        setRol(user.getRol());
+        setAdditional(user.getAdditional());
     }
 }
