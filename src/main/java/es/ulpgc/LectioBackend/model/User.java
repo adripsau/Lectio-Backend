@@ -128,7 +128,6 @@ public class User {
         setFirstName(user.getFirstName());
         setLastName(user.getLastName());
         setEmail(user.getEmail());
-        setPassword(user.getPassword());
         setPhoto(user.getPhoto());
         setRole(user.getRole());
         setAdditional(user.getAdditional());
