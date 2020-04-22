@@ -19,13 +19,23 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @RequestMapping(path = "/users/{userId}", method = {RequestMethod.GET})
+    public ResponseEntity getUserById(@PathVariable(value = "userId") long id) {
+        try {
+            User _user = userRepository.findById(id).get();
+            return buildResponse(HttpStatus.OK, _user);
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find user with id " + id + "\" }");
+        }
+    }
+
     @RequestMapping(path = "/users", method = {RequestMethod.GET})
     public ResponseEntity getAllUsers() {
         try {
             List<User> users = new ArrayList<>(userRepository.findAll());
             return (users.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildResponse(HttpStatus.OK, users);
         } catch (Exception e) {
-            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Hubo un problema, no se pudo crear el usuario\" }");
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get users\" }");
         }
     }
 
@@ -34,7 +44,7 @@ public class UserController {
         try {
             return buildResponse(HttpStatus.CREATED, store(user));
         } catch (Exception e) {
-            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Hubo un problema, no se pudo crear el usuario\" }");
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't create user\" }");
         }
     }
 
@@ -42,9 +52,9 @@ public class UserController {
     public ResponseEntity deleteUser(@PathVariable(value = "userId") long id) {
         try {
             userRepository.deleteById(id);
-            return buildResponse(HttpStatus.OK, "{ \"message\": \"Se ha dado de baja satisfactoriamente\" }");
+            return buildResponse(HttpStatus.OK, "{ \"message\": \"User deleted successfully\" }");
         } catch (Exception e) {
-            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Hubo un problema, no se eliminó el usuario\" }");
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't delete user with id " + id + "\" }");
         }
     }
 
@@ -55,7 +65,7 @@ public class UserController {
             _user.updateAll(user);
             return buildResponse(HttpStatus.ACCEPTED, userRepository.save(_user));
         } catch (Exception e) {
-            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Hubo un problema, no se pudo actualizar el usuario\" }");
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't update user\" }");
         }
     }
 
@@ -74,6 +84,6 @@ public class UserController {
     private User store(@RequestBody User user) {
         return userRepository
                 .save(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getPhoto(),
-                        user.getRol(), user.getAdditional()));
+                        user.getRole(), user.getAdditional()));
     }
 }

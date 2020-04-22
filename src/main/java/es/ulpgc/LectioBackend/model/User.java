@@ -6,7 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "usuarios", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
 public class User {
 
     @Id
@@ -14,11 +14,11 @@ public class User {
     private long id;
 
     @Size(min = 3)
-    @Column(name = "nombre", nullable = false)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @Size(min = 3)
-    @Column(name = "apellidos", nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @Size(min = 3)
@@ -26,29 +26,29 @@ public class User {
     private String email;
 
     @Size(min = 3)
-    @Column(name = "clave", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "photo", nullable = true)
     private String photo;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rol", nullable = false)
-    private Rol rol;
+    @Column(name = "role", nullable = false)
+    private Rol role;
 
-    @Column(name = "datos_adicionales", nullable = true)
+    @Column(name = "additional", nullable = true)
     private String additional;
 
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String password, String photo, Rol rol, String additional) {
+    public User(String firstName, String lastName, String email, String password, String photo, Rol role, String additional) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = encodePassword(password);
         this.photo = photo;
-        this.rol = rol;
+        this.role = role;
         this.additional = additional;
     }
 
@@ -108,12 +108,12 @@ public class User {
         this.photo = photo;
     }
 
-    public Rol getRol() {
-        return rol;
+    public Rol getRole() {
+        return role;
     }
 
-    public void setRol(Rol rol) {
-        this.rol = rol;
+    public void setRole(Rol role) {
+        this.role = role;
     }
 
     public String getAdditional() {
@@ -130,7 +130,7 @@ public class User {
         setEmail(user.getEmail());
         setPassword(user.getPassword());
         setPhoto(user.getPhoto());
-        setRol(user.getRol());
+        setRole(user.getRole());
         setAdditional(user.getAdditional());
     }
 }
