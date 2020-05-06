@@ -46,18 +46,10 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.password = encodePassword(password);
+        this.password = password;
         this.photo = photo;
         this.role = role;
         this.additional = additional;
-    }
-
-    private String encodePassword(String password) {
-        if (password.length() > 2) {
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            password = passwordEncoder.encode(password);
-        }
-        return password;
     }
 
     public long getId() {
@@ -97,7 +89,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = encodePassword(password);
+        this.password = password;
     }
 
     public String getPhoto() {

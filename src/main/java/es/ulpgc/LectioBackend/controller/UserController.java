@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class UserController {
     @RequestMapping(path = "/users", method = {RequestMethod.POST})
     public ResponseEntity createUser(@RequestBody User user) {
         try {
+            user.setPassword(encodePassword(user.getPassword()));
             return buildResponse(HttpStatus.CREATED, store(user));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't create user\" }");
@@ -85,5 +87,13 @@ public class UserController {
         return userRepository
                 .save(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getPhoto(),
                         user.getRole(), user.getAdditional()));
+    }
+
+    private String encodePassword(String password) {
+        if (password.length() > 2) {
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            password = passwordEncoder.encode(password);
+        }
+        return password;
     }
 }
