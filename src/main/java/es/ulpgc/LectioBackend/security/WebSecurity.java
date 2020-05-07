@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 import static es.ulpgc.LectioBackend.security.Constants.LOGIN_URL;
 
 @Configuration
@@ -31,9 +33,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public CustomCORSFilter getCorsFilter(){ return new CustomCORSFilter();}
-
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         /*
@@ -45,7 +44,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
          */
         httpSecurity
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .addFilterBefore(getCorsFilter(), SessionManagementFilter.class)
+                .cors().and()
                 .csrf().disable()
                 .authorizeRequests().antMatchers(HttpMethod.POST, LOGIN_URL).permitAll()
                 .anyRequest().authenticated().and()
@@ -62,7 +61,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+        CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
+        corsConfiguration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers", "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, " +
+                "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
+        source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
 
