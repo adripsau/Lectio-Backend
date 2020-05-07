@@ -2,6 +2,7 @@ package es.ulpgc.LectioBackend.controller;
 
 import es.ulpgc.LectioBackend.repository.UserRepository;
 import es.ulpgc.LectioBackend.model.User;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,14 +22,14 @@ public class UserController {
     private UserRepository userRepository;
 
     @RequestMapping(path = "/users/{userId}", method = {RequestMethod.GET})
-    public ResponseEntity getUserById(@PathVariable(value = "userId") long id) {
+    public ResponseEntity getUserByIdOrEmail(@PathVariable(value = "userId") String id) {
         try {
-            User _user = userRepository.findById(id).get();
-            return buildResponse(HttpStatus.OK, _user);
+            return isNumeric(id) ? getIDResponse(id) : getEmailResponse(id);
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find user with id " + id + "\" }");
         }
     }
+
 
     @RequestMapping(path = "/users", method = {RequestMethod.GET})
     public ResponseEntity getAllUsers() {
@@ -95,5 +96,31 @@ public class UserController {
             password = passwordEncoder.encode(password);
         }
         return password;
+    }
+
+    public boolean isNumeric(String strNum) {
+        if (strNum == null)
+            return false;
+
+        try {
+            Long.parseLong(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    private ResponseEntity getEmailResponse(@PathVariable("userId") String email) {
+        User _user = userRepository.findByEmail(email);
+        if(_user.getFirstName().equals(""))
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find user with email " + email + "\" }");
+
+        return buildResponse(HttpStatus.OK, _user);
+    }
+
+    private ResponseEntity getIDResponse(@PathVariable("userId") String id) {
+        long _id = Long.parseLong(id);
+        User _user = userRepository.findById(_id).get();
+        return buildResponse(HttpStatus.OK, _user);
     }
 }
