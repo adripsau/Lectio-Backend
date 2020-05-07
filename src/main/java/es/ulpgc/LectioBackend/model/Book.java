@@ -23,8 +23,6 @@ public class Book {
     @Column(name = "number_pages", nullable = false)
     private Integer number_pages;
 
-
-
     @Column(name = "isbn", nullable = false)
     private String isbn;
 
