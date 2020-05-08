@@ -34,10 +34,10 @@ public class BookController {
     public ResponseEntity getAllBooks(@RequestParam(required = false) String offset, @RequestParam(required = false) String limit) {
         try {
             List<Book> books;
-            if (offset == null || limit == null){
+            if (offset == null || limit == null) {
                 books = new ArrayList<>(bookRepository.findAll());
 
-            }else {
+            } else {
                 books = new ArrayList<>(
                         bookRepository.findAll(Integer.valueOf(offset) * Integer.valueOf(limit), Integer.valueOf(limit)));
             }
@@ -48,7 +48,7 @@ public class BookController {
         }
     }
 
-    private String convertToJson(int offset, int limit , List<Book> books) {
+    private String convertToJson(int offset, int limit, List<Book> books) {
         Gson gson = new Gson();
         return "{\"numBooks\": " + bookRepository.count() + ", \"page\": " + offset + ", \"size\": " + limit + ", \"books\": " + gson.toJson(books) + "}";
     }
