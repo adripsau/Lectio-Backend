@@ -74,7 +74,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         return source;
     }
 
-    private JWTAuthenticationFilter getAuthenticationFilter(AuthenticationManager manager){
+    private JWTAuthenticationFilter getAuthenticationFilter(AuthenticationManager manager) {
         JWTAuthenticationFilter filter = new JWTAuthenticationFilter(manager);
         filter.setFilterProcessesUrl(LOGIN_URL);
         return filter;

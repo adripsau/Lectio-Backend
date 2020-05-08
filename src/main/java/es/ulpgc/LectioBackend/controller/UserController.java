@@ -112,7 +112,7 @@ public class UserController {
 
     private ResponseEntity getEmailResponse(@PathVariable("userId") String email) {
         User _user = userRepository.findByEmail(email);
-        if(_user.getFirstName().equals(""))
+        if (_user.getFirstName().equals(""))
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find user with email " + email + "\" }");
 
         return buildResponse(HttpStatus.OK, _user);
