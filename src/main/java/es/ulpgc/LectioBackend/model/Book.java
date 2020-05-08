@@ -7,6 +7,10 @@ import javax.validation.constraints.Size;
 @Table(name = "books")
 public class Book {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     @Size(min = 3)
     @Column(name = "title", nullable = false)
     private String title;
@@ -19,27 +23,34 @@ public class Book {
     @Column(name = "publisher", nullable = false)
     private String publisher;
 
-    @Size(min = 3)
-    @Column(name = "number_pages", nullable = false)
-    private Integer number_pages;
+    @Size(min = 1)
+    @Column(name = "pages", nullable = false)
+    private String pages;
 
-    @Column(name = "isbn", nullable = false)
+    @Column(name = "isbn", unique=true, nullable = false)
     private String isbn;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "genre", nullable = false)
-    private Genre genre;
+    @Column(name = "genres", nullable = false)
+    private String genres;
+
+    @Column(name = "synopsis")
+    private String synopsis;
 
     public Book() {
     }
 
-    public Book(String title, String author, String publisher, Integer number_pages, String isbn, Genre genre) {
+    public Book(String title, String author, String publisher, String pages, String isbn, String[] genres, String synopsis) {
         this.title = title;
         this.author = author;
         this.publisher = publisher;
-        this.number_pages = number_pages;
+        this.pages = pages;
         this.isbn = isbn;
-        this.genre = genre;
+        this.genres = parseToString(genres);
+        this.synopsis = synopsis;
+    }
+
+    private String parseToString(String[] list) {
+        return String.join(",", list);
     }
 
     public String getTitle() {
@@ -66,12 +77,12 @@ public class Book {
         this.publisher = publisher;
     }
 
-    public Integer getNumber_pages() {
-        return number_pages;
+    public String getPages() {
+        return pages;
     }
 
-    public void setNumber_pages(Integer number_pages) {
-        this.number_pages = number_pages;
+    public void setPages(String pages) {
+        this.pages = pages;
     }
 
     public String getIsbn() {
@@ -82,20 +93,29 @@ public class Book {
         this.isbn = isbn;
     }
 
-    public Genre getGenre() {
-        return genre;
+    public String[] getGenres() {
+        return genres.split(",");
     }
 
-    public void setGenre(Genre genre) {
-        this.genre = genre;
+    public void setGenres(String[] genres) {
+        this.genres = parseToString(genres);
+    }
+
+    public String getSynopsis() {
+        return synopsis;
+    }
+
+    public void setSynopsis(String synopsis) {
+        this.synopsis = synopsis;
     }
 
     public void updateAll(Book book) {
         setTitle(book.getTitle());
         setAuthor(book.getAuthor());
         setPublisher(book.getPublisher());
-        setNumber_pages(book.getNumber_pages());
+        setPages(book.getPages());
         setIsbn(book.getIsbn());
-        setGenre(book.getGenre());
+        setGenres(book.getGenres());
+        setSynopsis(book.getSynopsis());
     }
 }
