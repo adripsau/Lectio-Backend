@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api")
@@ -23,6 +26,16 @@ public class BookController {
             return buildResponse(HttpStatus.CREATED, store(book));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't create book\" }");
+        }
+    }
+
+    @RequestMapping(path = "/books", method = {RequestMethod.GET})
+    public ResponseEntity getAllBooks() {
+        try {
+            List<Book> books = new ArrayList<>(bookRepository.findAll());
+            return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildResponse(HttpStatus.OK, books);
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get books\" }");
         }
     }
 
