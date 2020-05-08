@@ -1,5 +1,6 @@
 package es.ulpgc.LectioBackend.controller;
 
+import com.google.gson.Gson;
 import es.ulpgc.LectioBackend.model.Book;
 import es.ulpgc.LectioBackend.model.User;
 import es.ulpgc.LectioBackend.repository.BookRepository;
@@ -30,13 +31,26 @@ public class BookController {
     }
 
     @RequestMapping(path = "/books", method = {RequestMethod.GET})
-    public ResponseEntity getAllBooks() {
+    public ResponseEntity getAllBooks(@RequestParam(required = false) String offset, @RequestParam(required = false) String limit) {
         try {
-            List<Book> books = new ArrayList<>(bookRepository.findAll());
-            return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildResponse(HttpStatus.OK, books);
+            List<Book> books;
+            if (offset == null || limit == null){
+                books = new ArrayList<>(bookRepository.findAll());
+
+            }else {
+                books = new ArrayList<>(
+                        bookRepository.findAll(Integer.valueOf(offset) * Integer.valueOf(limit), Integer.valueOf(limit)));
+            }
+
+            return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildPaginatedResponse(HttpStatus.OK, convertToJson(Integer.valueOf(offset), Integer.valueOf(limit), books));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get books\" }");
         }
+    }
+
+    private String convertToJson(int offset, int limit , List<Book> books) {
+        Gson gson = new Gson();
+        return "{\"numBooks\": " + bookRepository.count() + ", \"page\": " + offset + ", \"size\": " + limit + ", \"books\": " + gson.toJson(books) + "}";
     }
 
     private Book store(@RequestBody Book book) {
@@ -55,5 +69,11 @@ public class BookController {
         return ResponseEntity.status(_status)
                 .headers(setHeaders())
                 .body(_body);
+    }
+
+    private ResponseEntity<String> buildPaginatedResponse(HttpStatus _status, String response) {
+        return ResponseEntity.status(_status)
+                .headers(setHeaders())
+                .body(response);
     }
 }
