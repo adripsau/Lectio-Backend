@@ -1,7 +1,5 @@
 package es.ulpgc.LectioBackend.model;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 

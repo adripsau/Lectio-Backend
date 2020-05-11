@@ -47,12 +47,12 @@ public class BookController {
         }
     }
 
-    @RequestMapping(path = "/books/{isbn}", method = {RequestMethod.GET})
-    public ResponseEntity getBookByIsbn(@PathVariable(value = "isbn") String isbn) {
+    @RequestMapping(path = "/books/{bookId}", method = {RequestMethod.GET})
+    public ResponseEntity getBookById(@PathVariable(value = "bookId") long id) {
         try {
-            return getISBNResponse(isbn);
+            return getIdResponse(id);
         } catch (Exception e) {
-            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find book with ISBN " + isbn + "\" }");
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find book with id " + id + "\" }");
         }
     }
 
@@ -85,10 +85,10 @@ public class BookController {
                 .body(response);
     }
 
-    private ResponseEntity getISBNResponse(@PathVariable("userId") String _isbn) {
-        Book _book = bookRepository.findByIsbn(_isbn);
+    private ResponseEntity getIdResponse(@PathVariable("userId") long _id) {
+        Book _book = bookRepository.findById(_id).get();
         if(_book==null)
-            return buildResponse(HttpStatus.NO_CONTENT, null);
+            return buildResponse(HttpStatus.NO_CONTENT, _book);
         return buildResponse(HttpStatus.OK, _book);
     }
 }
