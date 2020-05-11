@@ -7,7 +7,6 @@ import java.io.Serializable;
 @Table(name = "booklist")
 public class BookList implements Serializable {
 
-
     @EmbeddedId
     private BookListId bookListId;
 
