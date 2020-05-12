@@ -1,8 +1,12 @@
 package es.ulpgc.LectioBackend.controller;
 
+import com.google.gson.Gson;
 import es.ulpgc.LectioBackend.model.Book;
+import es.ulpgc.LectioBackend.model.BookList;
+import es.ulpgc.LectioBackend.model.UserList;
 import es.ulpgc.LectioBackend.repository.BookListRepository;
 import es.ulpgc.LectioBackend.repository.BookRepository;
+import es.ulpgc.LectioBackend.repository.UserListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,20 +25,31 @@ public class BookListController {
     private BookListRepository listRepository;
 
     @Autowired
+    private UserListRepository userListRepository;
+
+    @Autowired
     private BookRepository bookRepository;
 
-    @RequestMapping(path = "/users/{id}/{state}", method = {RequestMethod.GET})
-    public ResponseEntity getPendingBooks(@PathVariable(value = "id") long id, @PathVariable(value = "state") String state) {
+    @RequestMapping(path = "/users/{id}/list/{list_name}", method = {RequestMethod.GET})
+    public ResponseEntity getBookList(@PathVariable(value = "id") long id, @PathVariable(value = "list_name") String list_name) {
         try {
             List<Book> books = new ArrayList<>();
-            List<Integer> bookIDs = listRepository.getBookIdsByUserId(id, state);
-            bookIDs.forEach(bookId ->
-                books.add(bookRepository.findById((long)bookId).get()));
+            UserList userList = userListRepository.getUserListId(id, list_name);
 
-            return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildResponse(HttpStatus.OK, books);
+            List<BookList> bookLists = listRepository.getBookListByListId(userList.getList_id());
+
+            bookLists.forEach(bookList ->
+                    books.add(bookRepository.findById((long) bookList.getBookListId().getBook_id()).get()));
+
+            return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildResponse(HttpStatus.OK, convertToJson(userList, books));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get books\" }");
         }
+    }
+
+    private String convertToJson(UserList userList, List<Book> books) {
+        Gson gson = new Gson();
+        return "{\"list_name\": \"" + userList.getList_name() + "\" , \"list_description\": \"" + userList.getList_description() + "\", \"books\": " + gson.toJson(books) + "}";
     }
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {

@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface BookListRepository extends JpaRepository<BookList, BookListId> {
 
-    @Query(value="SELECT book_id FROM booklists WHERE user_id=?1 AND book_state=?2", nativeQuery = true)
-    List<Integer> getBookIdsByUserId(long id, String state);
+    @Query(value="SELECT * FROM booklists WHERE list_id=?1", nativeQuery = true)
+    List<BookList> getBookListByListId(long id);
 
 
 }
