@@ -11,4 +11,6 @@ import java.util.List;
 public interface BookRepository extends JpaRepository<Book, Long> {
     @Query(value="SELECT * FROM Books LIMIT ?2 OFFSET ?1 ", nativeQuery = true)
     public List<Book> findAll(int offset, int limit);
+
+    public Book findByIsbn(String isbn);
 }

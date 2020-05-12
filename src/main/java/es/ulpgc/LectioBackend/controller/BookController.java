@@ -2,7 +2,6 @@ package es.ulpgc.LectioBackend.controller;
 
 import com.google.gson.Gson;
 import es.ulpgc.LectioBackend.model.Book;
-import es.ulpgc.LectioBackend.model.User;
 import es.ulpgc.LectioBackend.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,12 +30,12 @@ public class BookController {
     }
 
     @RequestMapping(path = "/books", method = {RequestMethod.GET})
-    public ResponseEntity getAllBooks(@RequestParam(required = false) String offset, @RequestParam(required = false) String limit) {
+    public ResponseEntity getAllBooks(@RequestParam(required = false) String offset, @RequestParam(required = false, defaultValue = "0") String limit) {
         try {
             List<Book> books;
-            if (offset == null || limit == null) {
+            if (offset == null || limit.equals("0")) {
                 books = new ArrayList<>(bookRepository.findAll());
-
+                offset = "0";
             } else {
                 books = new ArrayList<>(
                         bookRepository.findAll(Integer.valueOf(offset) * Integer.valueOf(limit), Integer.valueOf(limit)));
@@ -45,6 +44,15 @@ public class BookController {
             return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildPaginatedResponse(HttpStatus.OK, convertToJson(Integer.valueOf(offset), Integer.valueOf(limit), books));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get books\" }");
+        }
+    }
+
+    @RequestMapping(path = "/books/{bookId}", method = {RequestMethod.GET})
+    public ResponseEntity getBookById(@PathVariable(value = "bookId") long id) {
+        try {
+            return getIdResponse(id);
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find book with id " + id + "\" }");
         }
     }
 
@@ -75,5 +83,12 @@ public class BookController {
         return ResponseEntity.status(_status)
                 .headers(setHeaders())
                 .body(response);
+    }
+
+    private ResponseEntity getIdResponse(@PathVariable("userId") long _id) {
+        Book _book = bookRepository.findById(_id).get();
+        if(_book==null)
+            return buildResponse(HttpStatus.NO_CONTENT, _book);
+        return buildResponse(HttpStatus.OK, _book);
     }
 }
