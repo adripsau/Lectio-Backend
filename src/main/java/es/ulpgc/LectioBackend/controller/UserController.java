@@ -2,7 +2,6 @@ package es.ulpgc.LectioBackend.controller;
 
 import es.ulpgc.LectioBackend.repository.UserRepository;
 import es.ulpgc.LectioBackend.model.User;
-import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
