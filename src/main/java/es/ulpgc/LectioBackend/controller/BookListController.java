@@ -3,6 +3,7 @@ package es.ulpgc.LectioBackend.controller;
 import com.google.gson.Gson;
 import es.ulpgc.LectioBackend.model.Book;
 import es.ulpgc.LectioBackend.model.BookList;
+import es.ulpgc.LectioBackend.model.User;
 import es.ulpgc.LectioBackend.model.UserList;
 import es.ulpgc.LectioBackend.repository.BookListRepository;
 import es.ulpgc.LectioBackend.repository.BookRepository;
@@ -34,7 +35,10 @@ public class BookListController {
     public ResponseEntity getBookList(@PathVariable(value = "id") long id, @PathVariable(value = "list_name") String list_name) {
         try {
             List<Book> books = new ArrayList<>();
-            UserList userList = userListRepository.getUserListId(id, list_name);
+            UserList userList = isNumeric(list_name) ? getIDResponse(list_name) : getNameResponse(id, list_name);
+
+            if(userList == null)
+                return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get list\" }");
 
             List<BookList> bookLists = listRepository.getBookListByListId(userList.getList_id());
 
@@ -73,6 +77,32 @@ public class BookListController {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
         return headers;
+    }
+
+    public boolean isNumeric(String strNum) {
+        if (strNum == null)
+            return false;
+
+        try {
+            Long.parseLong(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    private UserList getNameResponse(long id, @PathVariable("userId") String list_name) {
+        UserList userList = userListRepository.getUserListId(id, list_name);
+        if (userList.getList_name().equals(""))
+            return null;
+
+        return userList;
+    }
+
+    private UserList getIDResponse(@PathVariable("userId") String list_id) {
+        long _id = Long.parseLong(list_id);
+        UserList userList = userListRepository.findById(_id).get();
+        return userList;
     }
 
 }
