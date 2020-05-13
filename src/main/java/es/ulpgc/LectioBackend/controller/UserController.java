@@ -50,9 +50,8 @@ public class UserController {
         try {
             user.setPassword(encodePassword(user.getPassword()));
 
-
             User _user = store(user);
-            
+
             storeUserList(new UserList(_user.getUser_id(),"Pending",""));
             storeUserList(new UserList(_user.getUser_id(),"Finished",""));
 
@@ -135,8 +134,8 @@ public class UserController {
         return buildResponse(HttpStatus.OK, _user);
     }
 
-    private UserList storeUserList(UserList userList) {
-        return listRepository
+    private void storeUserList(UserList userList) {
+        listRepository
                 .save(new UserList(userList.getUser_id(), userList.getList_name(), userList.getList_description()));
     }
 }
