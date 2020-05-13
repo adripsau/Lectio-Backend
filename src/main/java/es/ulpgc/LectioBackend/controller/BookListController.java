@@ -47,6 +47,17 @@ public class BookListController {
         }
     }
 
+    @RequestMapping(path = "/users/{id}/list", method = {RequestMethod.GET})
+    public ResponseEntity getLists(@PathVariable(value = "id") long id){
+        try {
+            List<UserList> userList = userListRepository.findByUserId(id);
+
+            return (userList.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildResponse(HttpStatus.OK, userList);
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get lists\" }");
+        }
+    }
+
     private String convertToJson(UserList userList, List<Book> books) {
         Gson gson = new Gson();
         return "{\"list_name\": \"" + userList.getList_name() + "\" , \"list_description\": \"" + userList.getList_description() + "\", \"books\": " + gson.toJson(books) + "}";
