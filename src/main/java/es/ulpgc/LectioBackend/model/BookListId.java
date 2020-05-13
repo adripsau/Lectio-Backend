@@ -9,32 +9,32 @@ import java.util.Objects;
 public class BookListId implements Serializable {
 
     @Column(name = "list_id")
-    private int list_id;
+    private long list_id;
 
     @Column(name = "book_id")
-    private int book_id;
+    private long book_id;
 
     public BookListId() {
     }
 
-    public BookListId(int list_id, int book_id) {
+    public BookListId(long list_id, long book_id) {
         this.list_id = list_id;
         this.book_id = book_id;
     }
 
-    public int getList_id() {
+    public long getList_id() {
         return list_id;
     }
 
-    public int getBook_id() {
+    public long getBook_id() {
         return book_id;
     }
 
-    public void setList_id(int list_id) {
+    public void setList_id(long list_id) {
         this.list_id = list_id;
     }
 
-    public void setBook_id(int book_id) {
+    public void setBook_id(long book_id) {
         this.book_id = book_id;
     }
 

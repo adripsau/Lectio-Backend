@@ -3,7 +3,7 @@ package es.ulpgc.LectioBackend.controller;
 import com.google.gson.Gson;
 import es.ulpgc.LectioBackend.model.Book;
 import es.ulpgc.LectioBackend.model.BookList;
-import es.ulpgc.LectioBackend.model.User;
+import es.ulpgc.LectioBackend.model.BookListId;
 import es.ulpgc.LectioBackend.model.UserList;
 import es.ulpgc.LectioBackend.repository.BookListRepository;
 import es.ulpgc.LectioBackend.repository.BookRepository;
@@ -23,7 +23,7 @@ import java.util.List;
 public class BookListController {
 
     @Autowired
-    private BookListRepository listRepository;
+    private BookListRepository bookListRepository;
 
     @Autowired
     private UserListRepository userListRepository;
@@ -37,10 +37,10 @@ public class BookListController {
             List<Book> books = new ArrayList<>();
             UserList userList = isNumeric(list_name) ? getIDResponse(list_name) : getNameResponse(id, list_name);
 
-            if(userList == null)
+            if (userList == null)
                 return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get list\" }");
 
-            List<BookList> bookLists = listRepository.getBookListByListId(userList.getList_id());
+            List<BookList> bookLists = bookListRepository.getBookListByListId(userList.getList_id());
 
             bookLists.forEach(bookList ->
                     books.add(bookRepository.findById((long) bookList.getBookListId().getBook_id()).get()));
@@ -52,10 +52,9 @@ public class BookListController {
     }
 
     @RequestMapping(path = "/users/{id}/list", method = {RequestMethod.GET})
-    public ResponseEntity getLists(@PathVariable(value = "id") long id){
+    public ResponseEntity getLists(@PathVariable(value = "id") long id) {
         try {
             List<UserList> userList = userListRepository.findByUserId(id);
-
             return (userList.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildResponse(HttpStatus.OK, userList);
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get lists\" }");
@@ -63,14 +62,24 @@ public class BookListController {
     }
 
     @RequestMapping(path = "/users/{id}/list", method = {RequestMethod.POST})
-    public ResponseEntity getLists(@RequestBody UserList userList){
+    public ResponseEntity createList(@RequestBody UserList userList) {
         try {
-            return buildResponse(HttpStatus.CREATED, store(userList));
+            return buildResponse(HttpStatus.CREATED, storeUserList(userList));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't create list\" }");
         }
     }
 
+    @RequestMapping(path = "/lists", method = {RequestMethod.POST})
+    public ResponseEntity addBookToList(@RequestBody BookListId bookListId) {
+        try {
+            if (storeBookList(bookListId) == null)
+                return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't add to list\" }");
+            return buildResponse(HttpStatus.CREATED, storeBookList(bookListId));
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't add to list\" }");
+        }
+    }
 
 
     private String convertToJson(UserList userList, List<Book> books) {
@@ -116,9 +125,20 @@ public class BookListController {
         return userList;
     }
 
-    private UserList store(UserList userList) {
+    private UserList storeUserList(UserList userList) {
         return userListRepository
                 .save(new UserList(userList.getUser_id(), userList.getList_name(), userList.getList_description()));
+    }
+
+    private BookList storeBookList(BookListId bookListId) {
+
+        BookList bookList = bookListRepository.getBookList(bookListId.getList_id(), bookListId.getBook_id());
+
+        if (bookList == null)
+            return bookListRepository
+                    .save(new BookList(new BookListId(bookListId.getList_id(), bookListId.getBook_id())));
+        else
+            return null;
     }
 
 }
