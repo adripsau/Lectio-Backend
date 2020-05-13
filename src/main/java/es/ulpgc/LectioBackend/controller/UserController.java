@@ -1,5 +1,7 @@
 package es.ulpgc.LectioBackend.controller;
 
+import es.ulpgc.LectioBackend.model.UserList;
+import es.ulpgc.LectioBackend.repository.UserListRepository;
 import es.ulpgc.LectioBackend.repository.UserRepository;
 import es.ulpgc.LectioBackend.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserListRepository listRepository;
 
     @RequestMapping(path = "/users/{userId}", method = {RequestMethod.GET})
     public ResponseEntity getUserByIdOrEmail(@PathVariable(value = "userId") String id) {
@@ -44,7 +49,14 @@ public class UserController {
     public ResponseEntity createUser(@RequestBody User user) {
         try {
             user.setPassword(encodePassword(user.getPassword()));
-            return buildResponse(HttpStatus.CREATED, store(user));
+
+
+            User _user = store(user);
+            
+            storeUserList(new UserList(_user.getUser_id(),"Pending",""));
+            storeUserList(new UserList(_user.getUser_id(),"Finished",""));
+
+            return buildResponse(HttpStatus.CREATED, _user);
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't create user\" }");
         }
@@ -121,5 +133,10 @@ public class UserController {
         long _id = Long.parseLong(id);
         User _user = userRepository.findById(_id).get();
         return buildResponse(HttpStatus.OK, _user);
+    }
+
+    private UserList storeUserList(UserList userList) {
+        return listRepository
+                .save(new UserList(userList.getUser_id(), userList.getList_name(), userList.getList_description()));
     }
 }
