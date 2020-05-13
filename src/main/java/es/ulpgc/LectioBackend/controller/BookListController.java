@@ -62,6 +62,17 @@ public class BookListController {
         }
     }
 
+    @RequestMapping(path = "/users/{id}/list", method = {RequestMethod.POST})
+    public ResponseEntity getLists(@RequestBody UserList userList){
+        try {
+            return buildResponse(HttpStatus.CREATED, store(userList));
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't create list\" }");
+        }
+    }
+
+
+
     private String convertToJson(UserList userList, List<Book> books) {
         Gson gson = new Gson();
         return "{\"list_name\": \"" + userList.getList_name() + "\" , \"list_description\": \"" + userList.getList_description() + "\", \"books\": " + gson.toJson(books) + "}";
@@ -103,6 +114,11 @@ public class BookListController {
         long _id = Long.parseLong(list_id);
         UserList userList = userListRepository.findById(_id).get();
         return userList;
+    }
+
+    private UserList store(UserList userList) {
+        return userListRepository
+                .save(new UserList(userList.getUser_id(), userList.getList_name(), userList.getList_description()));
     }
 
 }

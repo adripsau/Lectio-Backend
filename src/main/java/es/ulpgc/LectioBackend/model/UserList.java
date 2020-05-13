@@ -24,8 +24,7 @@ public class UserList {
     public UserList() {
     }
 
-    public UserList(long list_id, long user_id, String list_name, String list_description) {
-        this.list_id = list_id;
+    public UserList(long user_id, String list_name, String list_description) {
         this.user_id = user_id;
         this.list_name = list_name;
         this.list_description = list_description;

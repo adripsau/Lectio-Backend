@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Versión del servidor:         10.4.12-MariaDB - mariadb.org binary distribution
 -- SO del servidor:              Win64
--- HeidiSQL Versión:             11.0.0.5919
+-- HeidiSQL Versión:             10.2.0.5599
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -71,15 +71,17 @@ CREATE TABLE IF NOT EXISTS `userlists` (
   `list_name` varchar(255) NOT NULL DEFAULT '',
   `list_description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`list_id`),
+  UNIQUE KEY `user_id_list_name` (`user_id`,`list_name`),
   KEY `user_list_id_fk` (`user_id`),
   CONSTRAINT `user_list_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 -- Volcando datos para la tabla lectio.userlists: ~2 rows (aproximadamente)
 /*!40000 ALTER TABLE `userlists` DISABLE KEYS */;
 REPLACE INTO `userlists` (`list_id`, `user_id`, `list_name`, `list_description`) VALUES
 	(1, 32, 'Esperando', 'Esperando nuevos caps'),
-	(2, 32, 'Pending', NULL);
+	(2, 32, 'Pending', NULL),
+	(5, 32, 'Bacano', 'Unos libros bien chingones');
 /*!40000 ALTER TABLE `userlists` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.users
