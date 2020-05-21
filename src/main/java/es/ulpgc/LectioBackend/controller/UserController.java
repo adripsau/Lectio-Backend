@@ -52,8 +52,8 @@ public class UserController {
 
             User _user = store(user);
 
-            storeUserList(new UserList(_user.getUser_id(),"Pending",""));
-            storeUserList(new UserList(_user.getUser_id(),"Finished",""));
+            storeUserList(new UserList(_user.getUser_id(), "Pending", ""));
+            storeUserList(new UserList(_user.getUser_id(), "Finished", ""));
 
             return buildResponse(HttpStatus.CREATED, _user);
         } catch (Exception e) {
