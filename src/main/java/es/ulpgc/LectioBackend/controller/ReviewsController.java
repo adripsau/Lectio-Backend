@@ -5,7 +5,6 @@ import es.ulpgc.LectioBackend.model.Book;
 import es.ulpgc.LectioBackend.model.Reviews;
 import es.ulpgc.LectioBackend.model.User;
 import es.ulpgc.LectioBackend.repository.ReviewsRepository;
-import es.ulpgc.LectioBackend.repository.UserListRepository;
 import es.ulpgc.LectioBackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;

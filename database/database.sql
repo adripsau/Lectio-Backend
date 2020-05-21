@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Versión del servidor:         10.4.12-MariaDB - mariadb.org binary distribution
 -- SO del servidor:              Win64
--- HeidiSQL Versión:             10.2.0.5599
+-- HeidiSQL Versión:             11.0.0.5919
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -28,12 +28,16 @@ CREATE TABLE IF NOT EXISTS `booklists` (
   CONSTRAINT `list_id_fk` FOREIGN KEY (`list_id`) REFERENCES `userlists` (`list_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.booklists: ~3 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.booklists: ~7 rows (aproximadamente)
 /*!40000 ALTER TABLE `booklists` DISABLE KEYS */;
 REPLACE INTO `booklists` (`book_id`, `list_id`) VALUES
 	(1, 1),
+	(2, 9),
 	(3, 1),
-	(5, 2);
+	(5, 1),
+	(5, 2),
+	(8, 2),
+	(8, 9);
 /*!40000 ALTER TABLE `booklists` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.books
@@ -49,9 +53,9 @@ CREATE TABLE IF NOT EXISTS `books` (
   `synopsis` varchar(20000) DEFAULT 'There are no synopsis.',
   PRIMARY KEY (`id`),
   UNIQUE KEY `isbn` (`isbn`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.books: ~7 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.books: ~8 rows (aproximadamente)
 /*!40000 ALTER TABLE `books` DISABLE KEYS */;
 REPLACE INTO `books` (`id`, `title`, `author`, `publisher`, `pages`, `isbn`, `genres`, `synopsis`) VALUES
 	(1, 'Libro', 'Autor', 'Editorial', '6969', '9788448005009', 'Science fiction,Fantasy', 'Sinopsis del libro'),
@@ -60,8 +64,35 @@ REPLACE INTO `books` (`id`, `title`, `author`, `publisher`, `pages`, `isbn`, `ge
 	(4, 'Una breve historia de casi todo', 'Devil Bryson', 'Editorial', '639', '97884421267009', 'Science fiction,Adventure', NULL),
 	(5, 'La teroia del todo', 'Stephen Hawking', 'Editorial', '639', '89884421267009', 'Science fiction,Adventure', NULL),
 	(6, 'Padre rico, Padre pobre', 'Kiyosaki', 'Editorial', '639', '89894421267009', 'Science fiction,Adventure', NULL),
-	(7, 'Rimas y leyendas', 'Gustavo Adolfo Becquer', 'Austral', '345', '89894421266509', 'Science fiction,Adventure', NULL);
+	(7, 'Rimas y leyendas', 'Gustavo Adolfo Becquer', 'Austral', '345', '89894421266509', 'Science fiction,Adventure', NULL),
+	(8, 'Delirios de grandeza', 'George Orwell', 'La Santillana', '362', '9781234567897', 'Action,Adventure,Science fiction,Historical fiction', 'Es una novela profunda que representa, como un ser cae en los deseos del poder.');
 /*!40000 ALTER TABLE `books` ENABLE KEYS */;
+
+-- Volcando estructura para tabla lectio.reviews
+DROP TABLE IF EXISTS `reviews`;
+CREATE TABLE IF NOT EXISTS `reviews` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `book_id` int(11) unsigned NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment` varchar(255) NOT NULL,
+  `punctuation` int(11) NOT NULL,
+  `user_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `book_id_user_id` (`book_id`,`user_id`),
+  KEY `user_id_reviews_fk` (`user_id`),
+  KEY `book_id_reviewes_fk` (`book_id`),
+  CONSTRAINT `book_id_reviews_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_id_reviews_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+
+-- Volcando datos para la tabla lectio.reviews: ~4 rows (aproximadamente)
+/*!40000 ALTER TABLE `reviews` DISABLE KEYS */;
+REPLACE INTO `reviews` (`id`, `book_id`, `user_id`, `comment`, `punctuation`, `user_name`) VALUES
+	(3, 1, 33, 'Guay', 4, 'Jose Gonzalez'),
+	(4, 8, 32, 'Meh', 2, 'edu rodriguez'),
+	(5, 8, 21, 'Me ha gustado', 4, 'alvaro suarez'),
+	(6, 8, 31, 'Obra maestra', 5, 'evan sanz');
+/*!40000 ALTER TABLE `reviews` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.userlists
 DROP TABLE IF EXISTS `userlists`;
@@ -74,14 +105,17 @@ CREATE TABLE IF NOT EXISTS `userlists` (
   UNIQUE KEY `user_id_list_name` (`user_id`,`list_name`),
   KEY `user_list_id_fk` (`user_id`),
   CONSTRAINT `user_list_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.userlists: ~2 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.userlists: ~6 rows (aproximadamente)
 /*!40000 ALTER TABLE `userlists` DISABLE KEYS */;
 REPLACE INTO `userlists` (`list_id`, `user_id`, `list_name`, `list_description`) VALUES
 	(1, 32, 'Esperando', 'Esperando nuevos caps'),
 	(2, 32, 'Pending', NULL),
-	(5, 32, 'Bacano', 'Unos libros bien chingones');
+	(5, 32, 'Bacano', 'Unos libros bien chingones'),
+	(7, 33, 'Pending', ''),
+	(8, 33, 'Finished', ''),
+	(9, 32, 'Anime', 'Me gusta ser otaco');
 /*!40000 ALTER TABLE `userlists` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.users
@@ -98,19 +132,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`user_id`) USING BTREE,
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `fullname` (`first_name`,`last_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8 COMMENT='Nota: el nombre de las columnas no puede contener mayúsculas, si no, hibernate peta.';
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COMMENT='Nota: el nombre de las columnas no puede contener mayúsculas, si no, hibernate peta.';
 
--- Volcando datos para la tabla lectio.users: ~8 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.users: ~4 rows (aproximadamente)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 REPLACE INTO `users` (`user_id`, `additional`, `email`, `first_name`, `last_name`, `photo`, `role`, `password`) VALUES
-	(1, 'Soy un usuario', 'pepe@email.com', 'pepe', 'jimenez', NULL, 'Administrator', '1234'),
-	(2, 'Soy un usuario', 'juan@email.com', 'juan', 'rodriguez', NULL, 'Librarian', '1234'),
-	(3, 'Soy un usuario', 'francisco@email.com', 'francisco', 'manolo', NULL, 'Librarian', '1234'),
-	(14, NULL, 'alex@email.com', 'alex', 'surita', NULL, 'Student', '1234'),
-	(17, NULL, 'jim@email.com', 'pepe', 'ramirez', NULL, 'Student', '1234'),
 	(21, NULL, 'a.s@email.com', 'alvaro', 'suarez', NULL, 'Student', '$2a$10$jvPMqIomjLhUGz1Y.q8XTOcVdt64qOelHUZw9SAPuPj6ML7pBwIHq'),
 	(31, NULL, 'es@email.com', 'evan', 'sanz', NULL, 'Student', '$2a$10$M2yfiweQ9hZ8Gx6lU0Z/9OpcT.9jN89dJ9FmyyDappS65oBeMkV3S'),
-	(32, NULL, 'edu@email.com', 'edu', 'rodriguez', NULL, 'Student', '$2a$10$4N9zW1on9MBJOhNMFi5/t.r1tynnWux5ls85w/CpglLmlg2M7pqUq');
+	(32, NULL, 'edu@email.com', 'edu', 'rodriguez', NULL, 'Student', '$2a$10$4N9zW1on9MBJOhNMFi5/t.r1tynnWux5ls85w/CpglLmlg2M7pqUq'),
+	(33, NULL, 'jose@email.com', 'Jose', 'Gonzalez', NULL, 'Librarian', '$2a$10$.V7ImD8VXqmlnfb36ikpy.izZgrRC4pZwcaGSv1Ldig8FcV3m/uum');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
