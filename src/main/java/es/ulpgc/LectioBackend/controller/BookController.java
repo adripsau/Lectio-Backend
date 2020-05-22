@@ -41,7 +41,8 @@ public class BookController {
                         bookRepository.findAll(Integer.valueOf(offset) * Integer.valueOf(limit), Integer.valueOf(limit)));
             }
 
-            return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildPaginatedResponse(HttpStatus.OK, convertToJson(Integer.valueOf(offset), Integer.valueOf(limit), books));
+            return (books.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildPaginatedResponse(HttpStatus.OK,
+                    convertToJson(Integer.valueOf(offset), Integer.valueOf(limit), books));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get books\" }");
         }

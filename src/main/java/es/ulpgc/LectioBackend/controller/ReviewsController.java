@@ -1,7 +1,6 @@
 package es.ulpgc.LectioBackend.controller;
 
 import com.google.gson.Gson;
-import es.ulpgc.LectioBackend.model.Book;
 import es.ulpgc.LectioBackend.model.Reviews;
 import es.ulpgc.LectioBackend.model.User;
 import es.ulpgc.LectioBackend.repository.ReviewsRepository;
