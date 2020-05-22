@@ -19,4 +19,8 @@ public interface ReviewsRepository extends JpaRepository<Reviews, Long> {
 
     @Query(value = "SELECT COUNT(*) FROM reviews WHERE book_id=?1", nativeQuery = true)
     public int countReviews(long book_id);
+
+    @Query(value = "SELECT COUNT(*) FROM booklists WHERE list_id=(SELECT list_id FROM " +
+            "userlists WHERE list_name='Finished' AND user_id=?1) AND book_id=?2", nativeQuery = true)
+    public int bookIsFinished(long user_id, long book_id);
 }

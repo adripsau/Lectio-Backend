@@ -3,7 +3,9 @@ package es.ulpgc.LectioBackend.controller;
 import com.google.gson.Gson;
 import es.ulpgc.LectioBackend.model.Reviews;
 import es.ulpgc.LectioBackend.model.User;
+import es.ulpgc.LectioBackend.repository.BookListRepository;
 import es.ulpgc.LectioBackend.repository.ReviewsRepository;
+import es.ulpgc.LectioBackend.repository.UserListRepository;
 import es.ulpgc.LectioBackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +29,19 @@ public class ReviewsController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserListRepository userListRepository;
+
+    @Autowired
+    private BookListRepository bookListRepository;
+
+
+    /**
+     * petition: /api/reviews?user_id=8&book_id=4
+     *
+     * @param user_id
+     * @param book_id
+     */
     @RequestMapping(path = "/reviews", method = {RequestMethod.GET})
     public ResponseEntity getReview(@RequestParam long user_id, @RequestParam long book_id) {
         try {
@@ -42,22 +59,47 @@ public class ReviewsController {
         }
     }
 
+    /**
+     * body: {
+     * "book_id": 5,
+     * "user_id": 33,
+     * "comment": "It was nice",
+     * "punctuation": 3
+     * }
+     *
+     * @param review
+     */
     @RequestMapping(path = "/reviews", method = {RequestMethod.POST})
     public ResponseEntity createReview(@RequestBody Reviews review) {
         try {
             User user = userRepository.findById(review.getUser_id()).get();
 
-            String fullname = user.getFirstName() + " " + user.getLastName();
+            if (reviewsRepository.bookIsFinished(user.getUser_id(), review.getBook_id()) == 1) {
+                String fullname = user.getFirstName() + " " + user.getLastName();
 
-            return buildResponse(HttpStatus.CREATED,
-                    reviewsRepository.save(new Reviews(review.getBook_id(), review.getUser_id(), review.getComment(), review.getPunctuation(), fullname)));
+                Reviews newReview = reviewsRepository.save(new Reviews(review.getBook_id(), review.getUser_id(),
+                                                                review.getComment(), review.getPunctuation(), fullname));
+                newReview.setCreated_at(Timestamp.from(Instant.now()));
 
+                return buildResponse(HttpStatus.CREATED, newReview);
+            } else {
+                return buildResponse(HttpStatus.CONFLICT,
+                        "{ \"message\": \"You have to read the book before creating a review\" }");
+            }
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT,
-                    "{ \"message\": \"Couldn't create review\" }");
+                    "{ \"message\": \"Couldn't create review, there was a conflict\" }");
         }
     }
 
+    /**
+     * petition: /api/reviews/{book_id}?limit={num_limit}&offset={page}
+     * example: /api/reviews/4?limit=3&offset=0
+     *
+     * @param offset
+     * @param limit
+     * @param bookId
+     */
     @RequestMapping(path = "/reviews/{bookId}", method = {RequestMethod.GET})
     public ResponseEntity getReviewsByBookId(@RequestParam(required = false) String offset, @RequestParam(required = false, defaultValue = "0") String limit, @PathVariable long bookId) {
         try {

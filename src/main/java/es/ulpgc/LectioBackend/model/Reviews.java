@@ -1,9 +1,13 @@
 package es.ulpgc.LectioBackend.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
+import java.sql.Timestamp;
+import java.util.Date;
 
 @Entity
 @Table(name = "reviews")
@@ -30,6 +34,11 @@ public class Reviews {
 
     @Column(name = "user_name")
     private String user_name;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date created_at;
 
     public Reviews() {
     }
@@ -88,5 +97,13 @@ public class Reviews {
 
     public void setUser_name(String user_name) {
         this.user_name = user_name;
+    }
+
+    public Date getCreated_at() {
+        return Timestamp.from(created_at.toInstant().plusSeconds(3600));
+    }
+
+    public void setCreated_at(Timestamp created_at) {
+        this.created_at = created_at;
     }
 }
