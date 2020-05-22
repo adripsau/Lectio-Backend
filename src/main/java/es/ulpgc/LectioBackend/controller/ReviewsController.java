@@ -112,7 +112,8 @@ public class ReviewsController {
                         reviewsRepository.findAll(Integer.valueOf(offset) * Integer.valueOf(limit), Integer.valueOf(limit), bookId));
             }
 
-            return (reviews.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildPaginatedResponse(HttpStatus.OK, convertToJson(Integer.valueOf(offset), Integer.valueOf(limit), reviews, bookId));
+            return (reviews.isEmpty()) ? buildResponse(HttpStatus.NO_CONTENT, null) : buildPaginatedResponse(HttpStatus.OK,
+                                                convertToJson(Integer.valueOf(offset), Integer.valueOf(limit), reviews, bookId));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't get books\" }");
         }
