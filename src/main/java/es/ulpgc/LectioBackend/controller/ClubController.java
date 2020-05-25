@@ -7,7 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
- 
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api")
@@ -16,6 +16,19 @@ public class ClubController {
     @Autowired
     ClubRepository clubRepository;
 
+    /**
+     * body: {
+     *     "club_name": String,
+     *     "club_description": String,
+     *     "creator": String ID,
+     *     "read_time": Epoch milliseconds,
+     *     "book_id": Int ID
+     * }
+     *
+     * Example URL: /api/clubs
+     *
+     * @param club
+     */
     @RequestMapping(path = "/clubs", method = {RequestMethod.POST})
     public ResponseEntity createClub(@RequestBody Club club) {
         try {
