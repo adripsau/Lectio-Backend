@@ -33,13 +33,25 @@ public class Club {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date read_time;
 
+    @Column(name = "num_subscribers", nullable = false)
+    private long num_subscribers;
+
     public Club() {
+    }
+
+    public Club(String club_name, String club_description, Long book_id, long creator, Date read_time, long num_subscribers) {
+        this.club_name = club_name;
+        this.club_description = club_description;
+        this.book_id = book_id;
+        this.creator = creator;
+        this.read_time = read_time;
+        this.num_subscribers = num_subscribers;
     }
 
     public Club(String club_name, String club_description, Long book_id, long creator, Date read_time) {
         this.club_name = club_name;
         this.club_description = club_description;
-        this.book_id=book_id;
+        this.book_id = book_id;
         this.creator = creator;
         this.read_time = read_time;
     }
@@ -91,5 +103,9 @@ public class Club {
     public void setRead_time(Date read_time) {
         this.read_time = read_time;
     }
+
+    public long getNum_subscribers() { return num_subscribers; }
+
+    public void setNum_subscribers(long num_subscribers) { this.num_subscribers = num_subscribers; }
 }
 
