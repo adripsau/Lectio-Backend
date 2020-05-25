@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Versión del servidor:         10.4.12-MariaDB - mariadb.org binary distribution
 -- SO del servidor:              Win64
--- HeidiSQL Versión:             10.2.0.5599
+-- HeidiSQL Versión:             11.0.0.5919
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -85,18 +85,21 @@ CREATE TABLE IF NOT EXISTS `club` (
   `book_id` int(11) unsigned DEFAULT NULL,
   `creator` int(11) NOT NULL DEFAULT 0,
   `read_time` date DEFAULT NULL,
+  `num_subscribers` int(11) unsigned NOT NULL DEFAULT 0,
+  `private` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `club_book_id_fk` (`book_id`),
   KEY `club_creator_fk` (`creator`),
   CONSTRAINT `club_book_id_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `club_creator_fk` FOREIGN KEY (`creator`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 
 -- Volcando datos para la tabla lectio.club: ~2 rows (aproximadamente)
 /*!40000 ALTER TABLE `club` DISABLE KEYS */;
-REPLACE INTO `club` (`id`, `club_name`, `club_description`, `book_id`, `creator`, `read_time`) VALUES
-	(5, 'Los Pocholos', 'Vamos a aprender y leer mucho :)', NULL, 33, NULL),
-	(7, 'Los Pocholos', 'Vamos a aprender y leer mucho :)', 3, 33, '1970-01-19');
+REPLACE INTO `club` (`id`, `club_name`, `club_description`, `book_id`, `creator`, `read_time`, `num_subscribers`, `private`, `password`) VALUES
+	(5, 'Los Pocholos', 'Vamos a aprender y leer mucho :)', NULL, 33, NULL, 0, 0, NULL),
+	(21, 'Los chunguitos', 'Libros para gente con problemas', NULL, 32, NULL, 2, 1, '$2a$10$5EPZEIcPHbet5ssOSt6.2eGxLheX0xZ2cIXNtWNvcnBsaAE0cGYia');
 /*!40000 ALTER TABLE `club` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.club_subscribers
@@ -110,8 +113,10 @@ CREATE TABLE IF NOT EXISTS `club_subscribers` (
   CONSTRAINT `club_subs_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.club_subscribers: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.club_subscribers: ~1 rows (aproximadamente)
 /*!40000 ALTER TABLE `club_subscribers` DISABLE KEYS */;
+REPLACE INTO `club_subscribers` (`club_id`, `user_id`) VALUES
+	(21, 32);
 /*!40000 ALTER TABLE `club_subscribers` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.reviews
@@ -198,4 +203,3 @@ REPLACE INTO `users` (`user_id`, `additional`, `email`, `first_name`, `last_name
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-club
