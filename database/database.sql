@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Versión del servidor:         10.4.12-MariaDB - mariadb.org binary distribution
 -- SO del servidor:              Win64
--- HeidiSQL Versión:             11.0.0.5919
+-- HeidiSQL Versión:             10.2.0.5599
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -28,15 +28,23 @@ CREATE TABLE IF NOT EXISTS `booklists` (
   CONSTRAINT `list_id_fk` FOREIGN KEY (`list_id`) REFERENCES `userlists` (`list_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.booklists: ~7 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.booklists: ~15 rows (aproximadamente)
 /*!40000 ALTER TABLE `booklists` DISABLE KEYS */;
 REPLACE INTO `booklists` (`book_id`, `list_id`) VALUES
 	(1, 1),
+	(2, 8),
 	(2, 9),
 	(3, 1),
+	(3, 8),
+	(4, 8),
 	(5, 1),
 	(5, 2),
+	(5, 8),
+	(6, 8),
+	(6, 11),
+	(7, 8),
 	(8, 2),
+	(8, 8),
 	(8, 9);
 /*!40000 ALTER TABLE `booklists` ENABLE KEYS */;
 
@@ -68,6 +76,44 @@ REPLACE INTO `books` (`id`, `title`, `author`, `publisher`, `pages`, `isbn`, `ge
 	(8, 'Delirios de grandeza', 'George Orwell', 'La Santillana', '362', '9781234567897', 'Action,Adventure,Science fiction,Historical fiction', 'Es una novela profunda que representa, como un ser cae en los deseos del poder.');
 /*!40000 ALTER TABLE `books` ENABLE KEYS */;
 
+-- Volcando estructura para tabla lectio.club
+DROP TABLE IF EXISTS `club`;
+CREATE TABLE IF NOT EXISTS `club` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `club_name` varchar(255) NOT NULL,
+  `club_description` varchar(255) NOT NULL,
+  `book_id` int(11) unsigned DEFAULT NULL,
+  `creator` int(11) NOT NULL DEFAULT 0,
+  `read_time` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `club_book_id_fk` (`book_id`),
+  KEY `club_creator_fk` (`creator`),
+  CONSTRAINT `club_book_id_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `club_creator_fk` FOREIGN KEY (`creator`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
+-- Volcando datos para la tabla lectio.club: ~2 rows (aproximadamente)
+/*!40000 ALTER TABLE `club` DISABLE KEYS */;
+REPLACE INTO `club` (`id`, `club_name`, `club_description`, `book_id`, `creator`, `read_time`) VALUES
+	(5, 'Los Pocholos', 'Vamos a aprender y leer mucho :)', NULL, 33, NULL),
+	(7, 'Los Pocholos', 'Vamos a aprender y leer mucho :)', 3, 33, '1970-01-19');
+/*!40000 ALTER TABLE `club` ENABLE KEYS */;
+
+-- Volcando estructura para tabla lectio.club_subscribers
+DROP TABLE IF EXISTS `club_subscribers`;
+CREATE TABLE IF NOT EXISTS `club_subscribers` (
+  `club_id` int(11) unsigned NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`club_id`,`user_id`),
+  KEY `club_subs_user_id_fk` (`user_id`),
+  CONSTRAINT `club_subs_club_id_fk` FOREIGN KEY (`club_id`) REFERENCES `club` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `club_subs_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Volcando datos para la tabla lectio.club_subscribers: ~0 rows (aproximadamente)
+/*!40000 ALTER TABLE `club_subscribers` DISABLE KEYS */;
+/*!40000 ALTER TABLE `club_subscribers` ENABLE KEYS */;
+
 -- Volcando estructura para tabla lectio.reviews
 DROP TABLE IF EXISTS `reviews`;
 CREATE TABLE IF NOT EXISTS `reviews` (
@@ -77,21 +123,26 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   `comment` varchar(255) NOT NULL,
   `punctuation` int(11) NOT NULL,
   `user_name` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `book_id_user_id` (`book_id`,`user_id`),
   KEY `user_id_reviews_fk` (`user_id`),
   KEY `book_id_reviewes_fk` (`book_id`),
   CONSTRAINT `book_id_reviews_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `user_id_reviews_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.reviews: ~4 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.reviews: ~8 rows (aproximadamente)
 /*!40000 ALTER TABLE `reviews` DISABLE KEYS */;
-REPLACE INTO `reviews` (`id`, `book_id`, `user_id`, `comment`, `punctuation`, `user_name`) VALUES
-	(3, 1, 33, 'Guay', 4, 'Jose Gonzalez'),
-	(4, 8, 32, 'Meh', 2, 'edu rodriguez'),
-	(5, 8, 21, 'Me ha gustado', 4, 'alvaro suarez'),
-	(6, 8, 31, 'Obra maestra', 5, 'evan sanz');
+REPLACE INTO `reviews` (`id`, `book_id`, `user_id`, `comment`, `punctuation`, `user_name`, `created_at`) VALUES
+	(3, 1, 33, 'Guay', 4, 'Jose Gonzalez', '0000-00-00 00:00:00'),
+	(4, 8, 32, 'Meh', 2, 'edu rodriguez', '0000-00-00 00:00:00'),
+	(5, 8, 21, 'Me ha gustado', 4, 'alvaro suarez', '0000-00-00 00:00:00'),
+	(6, 8, 31, 'Obra maestra', 5, 'evan sanz', '0000-00-00 00:00:00'),
+	(7, 4, 33, 'Educativo, estuvo gucci', 4, 'Jose Gonzalez', '0000-00-00 00:00:00'),
+	(16, 3, 33, 'No hay ningún juego.', 2, 'Jose Gonzalez', '2020-05-22 17:36:53'),
+	(18, 5, 33, 'Me caía bien', 1, 'Jose Gonzalez', '2020-05-22 17:41:51'),
+	(19, 6, 32, 'Muy entretenido', 4, 'edu rodriguez', '2020-05-22 19:53:21');
 /*!40000 ALTER TABLE `reviews` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.userlists
@@ -105,9 +156,9 @@ CREATE TABLE IF NOT EXISTS `userlists` (
   UNIQUE KEY `user_id_list_name` (`user_id`,`list_name`),
   KEY `user_list_id_fk` (`user_id`),
   CONSTRAINT `user_list_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.userlists: ~6 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.userlists: ~7 rows (aproximadamente)
 /*!40000 ALTER TABLE `userlists` DISABLE KEYS */;
 REPLACE INTO `userlists` (`list_id`, `user_id`, `list_name`, `list_description`) VALUES
 	(1, 32, 'Esperando', 'Esperando nuevos caps'),
@@ -115,7 +166,8 @@ REPLACE INTO `userlists` (`list_id`, `user_id`, `list_name`, `list_description`)
 	(5, 32, 'Bacano', 'Unos libros bien chingones'),
 	(7, 33, 'Pending', ''),
 	(8, 33, 'Finished', ''),
-	(9, 32, 'Anime', 'Me gusta ser otaco');
+	(9, 32, 'Anime', 'Me gusta ser otaco'),
+	(11, 32, 'Finished', NULL);
 /*!40000 ALTER TABLE `userlists` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.users
@@ -146,3 +198,4 @@ REPLACE INTO `users` (`user_id`, `additional`, `email`, `first_name`, `last_name
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+club
