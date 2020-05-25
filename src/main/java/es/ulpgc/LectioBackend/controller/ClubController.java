@@ -50,6 +50,16 @@ public class ClubController {
         }
     }
 
+    @RequestMapping(path = "/clubs", method = {RequestMethod.GET})
+    public ResponseEntity getClubs(){
+        try {
+            return buildResponse(HttpStatus.OK, clubRepository.findAll());
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT,
+                    "{ \"message\": \"Couldn't find clubs, there was a conflict\" }");
+        }
+    }
+
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
                 .headers(setHeaders())
