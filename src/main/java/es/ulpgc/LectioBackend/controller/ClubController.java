@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api")
@@ -101,7 +104,7 @@ public class ClubController {
     }
 
     /**
-     *  Example URL: [POST] /api/clubs/unsubscribe?user_id={user_id}&club_id={club_id}
+     *  Example URL: [DELETE] /api/clubs/unsubscribe?user_id={user_id}&club_id={club_id}
      */
     @RequestMapping(path = "/clubs/unsubscribe", method = {RequestMethod.DELETE})
     public ResponseEntity unsubscribeClub(@RequestParam(value = "user_id") long userId, @RequestParam(value = "club_id") long clubId, @RequestBody(required = false) String password) {
@@ -118,10 +121,32 @@ public class ClubController {
             clubRepository.save(club);
             clubSubscribersRepository.delete(clubSub);
 
-            return buildResponse(HttpStatus.OK, "{ \"message\": \"Unsubscribed successfully\" }");
+            return buildResponse(HttpStatus.OK, "{ \"message\": \"Unsubscribed successfully of club " + club.getClub_name() + "\" }");
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT,
                     "{ \"message\": \"Couldn't unsubscribe to the club, there was a conflict\" }");
+        }
+    }
+
+    /**
+     * Example URL: [GET] /api/clubs/{user_id}
+     *
+     * @return Array
+     */
+    @RequestMapping(path = "/clubs/{user_id}", method = {RequestMethod.GET})
+    public ResponseEntity getSubscribedClubs(@PathVariable(value = "user_id") long user_id) {
+        try {
+            List<ClubSubscribers> clubsSubscribed = clubSubscribersRepository.findClubsSubscribed(user_id);
+
+            List<Club> clubs = new ArrayList<>();
+            clubsSubscribed.forEach(c -> {
+                Club club = clubRepository.findById(c.getClubSubscribersId().getClub_id()).get();
+                clubs.add(club);
+            });
+            return buildResponse(HttpStatus.OK, clubs);
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT,
+                    "{ \"message\": \"Couldn't find clubs, there was a conflict\" }");
         }
     }
 
