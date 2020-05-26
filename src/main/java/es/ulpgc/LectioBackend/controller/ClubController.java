@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @CrossOrigin
@@ -149,6 +150,39 @@ public class ClubController {
                     "{ \"message\": \"Couldn't find clubs, there was a conflict\" }");
         }
     }
+
+    /**
+     * body: {
+     *      *
+     *      * 	"book_id": 7,
+     *      * 	"club_id": 21,
+     *      * 	"date": 1590490709615,
+     *      * }
+     *
+     * Example URL: [PUT] /api/clubs
+     *
+     */
+    @RequestMapping(path = "/clubs", method = {RequestMethod.PUT})
+    public ResponseEntity createClub(@RequestBody String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(json);
+            long book_id = jsonNode.findValue("book_id").asLong();
+            long club_id = jsonNode.findValue("club_id").asLong();
+            long date = jsonNode.findValue("date").asLong();
+            Date finishDate = new Date(date);
+
+            Club club = clubRepository.findById(club_id).get();
+            club.setBook_id(book_id);
+            club.setRead_time(finishDate);
+
+            return buildResponse(HttpStatus.CREATED, clubRepository.save(club));
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT,
+                    "{ \"message\": \"Couldn't create club, there was a conflict\" }");
+        }
+    }
+
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
