@@ -36,23 +36,15 @@ public class Club {
     @Column(name = "num_subscribers", nullable = false)
     private long num_subscribers;
 
-    @Column(name = "private", nullable = false)
-    private boolean is_private;
-
-    @Column(name = "password", nullable = true)
-    private String password;
-
     public Club() {
     }
 
-    public Club(String club_name, String club_description, Long book_id, long creator, Date read_time, boolean is_private, String password) {
+    public Club(String club_name, String club_description, Long book_id, long creator, Date read_time) {
         this.club_name = club_name;
         this.club_description = club_description;
         this.book_id = book_id;
         this.creator = creator;
         this.read_time = read_time;
-        this.is_private = is_private;
-        this.password = (!is_private) ? null : password;
     }
 
     public long getId() {
@@ -111,24 +103,12 @@ public class Club {
         this.num_subscribers = num_subscribers;
     }
 
-    public boolean isIs_private() {
-        return is_private;
-    }
-
-    public void setIs_private(boolean is_private) {
-        this.is_private = is_private;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public void increaseSubscribers() {
         num_subscribers++;
+    }
+
+    public void decreaseSubscribers() {
+        num_subscribers--;
     }
 }
 

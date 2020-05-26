@@ -34,8 +34,6 @@ public class ClubController {
      *      * "creator": String ID,
      *      * "read_time": (Optional)Epoch milliseconds only if book_id is defined,
      *      * "book_id": (Optional)Int ID only if read_time is defined
-     *      * "is_private": boolean
-     *      * "password": (Optional)String only if is_private is true
      *      * }
      *
      * Example URL: [POST] /api/clubs
@@ -52,12 +50,10 @@ public class ClubController {
             if (club.getBook_id() != null && club.getRead_time() == null)
                 return buildResponse(HttpStatus.CONFLICT,
                         "{ \"message\": \"Couldn't create club, there wasn't any time to read the specified book\" }");
-            if (club.isIs_private()) {
-                club.setPassword(encodePassword(club.getPassword()));
-            }
+
 
             Club newClub = new Club(club.getClub_name(), club.getClub_description(), club.getBook_id(),
-                    club.getCreator(), club.getRead_time(), club.isIs_private(), club.getPassword());
+                    club.getCreator(), club.getRead_time());
 
             return buildResponse(HttpStatus.CREATED, clubRepository.save(newClub));
         } catch (Exception e) {
@@ -81,7 +77,7 @@ public class ClubController {
     }
 
     /**
-     *
+     *  Example URL: [POST] /api/clubs/subscribe?user_id={user_id}&club_id={club_id}
      */
     @RequestMapping(path = "/clubs/subscribe", method = {RequestMethod.POST})
     public ResponseEntity subscribeClub(@RequestParam(value = "user_id") long userId, @RequestParam(value = "club_id") long clubId, @RequestBody(required = false) String password) {
@@ -89,6 +85,11 @@ public class ClubController {
 
             Club club = clubRepository.findById(clubId).get();
 
+            ClubSubscribers clubSub = clubSubscribersRepository.findByClubIdAndUserId(userId,clubId);
+            if(clubSub != null) {
+                return buildResponse(HttpStatus.CONFLICT,
+                        "{ \"message\": \"Couldn't subscribe to the club, already subscribed\" }");
+            }
             club.increaseSubscribers();
             clubRepository.save(club);
 
@@ -99,13 +100,29 @@ public class ClubController {
         }
     }
 
-    private String encodePassword(String password) {
-        password = passwordEncoder.encode(password);
-        return password;
-    }
+    /**
+     *  Example URL: [POST] /api/clubs/unsubscribe?user_id={user_id}&club_id={club_id}
+     */
+    @RequestMapping(path = "/clubs/unsubscribe", method = {RequestMethod.DELETE})
+    public ResponseEntity unsubscribeClub(@RequestParam(value = "user_id") long userId, @RequestParam(value = "club_id") long clubId, @RequestBody(required = false) String password) {
+        try {
 
-    private boolean isEquals(String dbPassword, String passedPassword) {
-        return passwordEncoder.matches(passedPassword,dbPassword);
+            Club club = clubRepository.findById(clubId).get();
+
+            ClubSubscribers clubSub = clubSubscribersRepository.findByClubIdAndUserId(userId,clubId);
+            if(clubSub == null) {
+                return buildResponse(HttpStatus.CONFLICT,
+                        "{ \"message\": \"Couldn't unsubscribe to the club, user is not subscribed\" }");
+            }
+            club.decreaseSubscribers();
+            clubRepository.save(club);
+            clubSubscribersRepository.delete(clubSub);
+
+            return buildResponse(HttpStatus.OK, "{ \"message\": \"Unsubscribed successfully\" }");
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT,
+                    "{ \"message\": \"Couldn't unsubscribe to the club, there was a conflict\" }");
+        }
     }
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
