@@ -17,13 +17,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/api")
 public class ClubController {
-
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
     ClubRepository clubRepository;
@@ -33,13 +32,13 @@ public class ClubController {
 
     /**
      * body: {
-     *      * "club_name": String,
-     *      * "club_description": String,
-     *      * "creator": String ID,
-     *      * "read_time": (Optional)Epoch milliseconds only if book_id is defined,
-     *      * "book_id": (Optional)Int ID only if read_time is defined
-     *      * }
-     *
+     * * "club_name": String,
+     * * "club_description": String,
+     * * "creator": String ID,
+     * * "read_time": (Optional)Epoch milliseconds only if book_id is defined,
+     * * "book_id": (Optional)Int ID only if read_time is defined
+     * * }
+     * <p>
      * Example URL: [POST] /api/clubs
      *
      * @param club
@@ -68,6 +67,7 @@ public class ClubController {
 
     /**
      * Example URL: [GET] /api/clubs
+     *
      * @return Array
      */
     @RequestMapping(path = "/clubs", method = {RequestMethod.GET})
@@ -81,7 +81,7 @@ public class ClubController {
     }
 
     /**
-     *  Example URL: [POST] /api/clubs/subscribe?user_id={user_id}&club_id={club_id}
+     * Example URL: [POST] /api/clubs/subscribe?user_id={user_id}&club_id={club_id}
      */
     @RequestMapping(path = "/clubs/subscribe", method = {RequestMethod.POST})
     public ResponseEntity subscribeClub(@RequestParam(value = "user_id") long userId, @RequestParam(value = "club_id") long clubId, @RequestBody(required = false) String password) {
@@ -89,8 +89,8 @@ public class ClubController {
 
             Club club = clubRepository.findById(clubId).get();
 
-            ClubSubscribers clubSub = clubSubscribersRepository.findByClubIdAndUserId(userId,clubId);
-            if(clubSub != null) {
+            ClubSubscribers clubSub = clubSubscribersRepository.findByClubIdAndUserId(userId, clubId);
+            if (clubSub != null) {
                 return buildResponse(HttpStatus.CONFLICT,
                         "{ \"message\": \"Couldn't subscribe to the club, already subscribed\" }");
             }
@@ -105,7 +105,7 @@ public class ClubController {
     }
 
     /**
-     *  Example URL: [DELETE] /api/clubs/unsubscribe?user_id={user_id}&club_id={club_id}
+     * Example URL: [DELETE] /api/clubs/unsubscribe?user_id={user_id}&club_id={club_id}
      */
     @RequestMapping(path = "/clubs/unsubscribe", method = {RequestMethod.DELETE})
     public ResponseEntity unsubscribeClub(@RequestParam(value = "user_id") long userId, @RequestParam(value = "club_id") long clubId, @RequestBody(required = false) String password) {
@@ -113,8 +113,8 @@ public class ClubController {
 
             Club club = clubRepository.findById(clubId).get();
 
-            ClubSubscribers clubSub = clubSubscribersRepository.findByClubIdAndUserId(userId,clubId);
-            if(clubSub == null) {
+            ClubSubscribers clubSub = clubSubscribersRepository.findByClubIdAndUserId(userId, clubId);
+            if (clubSub == null) {
                 return buildResponse(HttpStatus.CONFLICT,
                         "{ \"message\": \"Couldn't unsubscribe to the club, user is not subscribed\" }");
             }
@@ -153,17 +153,16 @@ public class ClubController {
 
     /**
      * body: {
-     *      *
-     *      * 	"book_id": 7,
-     *      * 	"club_id": 21,
-     *      * 	"date": 1590490709615,
-     *      * }
-     *
+     * *
+     * * 	"book_id": 7,
+     * * 	"club_id": 21,
+     * * 	"date": 1590490709615,
+     * * }
+     * <p>
      * Example URL: [PUT] /api/clubs
-     *
      */
     @RequestMapping(path = "/clubs", method = {RequestMethod.PUT})
-    public ResponseEntity createClub(@RequestBody String json) {
+    public ResponseEntity setToReadBook(@RequestBody String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(json);
@@ -183,6 +182,26 @@ public class ClubController {
         }
     }
 
+    /**
+     * Example URL: [DELETE] /api/clubs/{club_id}
+     */
+    @RequestMapping(path = "/clubs/{club_id}", method = {RequestMethod.DELETE})
+    public ResponseEntity deleteClub(@PathVariable(value = "club_id") long clubId) {
+        try {
+            Club club = (clubRepository.findById(clubId).isEmpty()) ? null : clubRepository.findById(clubId).get();
+
+            if (club == null)
+                return buildResponse(HttpStatus.NOT_FOUND,
+                        "{ \"message\": \"Couldn't delete the club, there isn't any club with id " + clubId + "\" }");
+
+            clubRepository.deleteById(clubId);
+
+            return buildResponse(HttpStatus.OK, "{ \"message\": \"Delete of club  " + club.getClub_name() + " successfully \" }");
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT,
+                    "{ \"message\": \"Couldn't delete the club, there was a conflict\" }");
+        }
+    }
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
