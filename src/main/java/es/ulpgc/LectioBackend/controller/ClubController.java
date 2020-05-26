@@ -89,22 +89,8 @@ public class ClubController {
 
             Club club = clubRepository.findById(clubId).get();
 
-            if (club.isIs_private()) {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jsonNode;
-                jsonNode = mapper.readTree(password);
-                jsonNode = jsonNode.findValue("password");
-                if (isEquals(club.getPassword(), jsonNode.textValue())) {
-                    club.increaseSubscribers();
-                    clubRepository.save(club);
-                }else {
-                    return buildResponse(HttpStatus.NOT_ACCEPTABLE,
-                            "{ \"message\": \"Incorrect password\" }");
-                }
-            }else{
-                club.increaseSubscribers();
-                clubRepository.save(club);
-            }
+            club.increaseSubscribers();
+            clubRepository.save(club);
 
             return buildResponse(HttpStatus.OK, clubSubscribersRepository.save(new ClubSubscribers(new ClubSubscribersId(userId, clubId))));
         } catch (Exception e) {
