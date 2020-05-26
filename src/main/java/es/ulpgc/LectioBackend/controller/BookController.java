@@ -57,6 +57,46 @@ public class BookController {
         }
     }
 
+    /**
+     * Example URL: [GET] /api/books/search?title={title}&author={author}&genre={genre}&publisher={publisher}
+     *
+     * params are optional but you must add at least one
+     *
+     * @param title
+     * @param author
+     * @param genre
+     * @param publisher
+     */
+    @RequestMapping(path = "/books/search", method = {RequestMethod.GET})
+    public ResponseEntity searchBookByName(@RequestParam(value = "title", required = false, defaultValue = "") String title,
+                                           @RequestParam(value = "author", required = false, defaultValue = "") String author,
+                                           @RequestParam(value = "genre", required = false, defaultValue = "") String genre,
+                                           @RequestParam(value = "publisher", required = false, defaultValue = "") String publisher) {
+        try {
+            if (author.equals("") && genre.equals("") && publisher.equals("")) {
+                if (title.equals(""))
+                    return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"You must specify book title at least\" }");
+                else
+                    return searchByName(title);
+            }
+            List<Book> books = bookRepository.findByFilter(title, author, genre, publisher);
+            if (books.size() == 0)
+                return buildResponse(HttpStatus.NO_CONTENT, "{ \"message\": \"Couldn't find book with specified filters\" }");
+
+            return buildResponse(HttpStatus.OK, books);
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find book, there was a conflict\" }");
+        }
+    }
+
+    private ResponseEntity searchByName(String title) {
+        List<Book> books = bookRepository.findByName(title);
+        if (books.size() == 0)
+            return buildResponse(HttpStatus.NO_CONTENT, "{ \"message\": \"Couldn't find book with name " + title + "\" }");
+
+        return buildResponse(HttpStatus.OK, books);
+    }
+
     private String convertToJson(int offset, int limit, List<Book> books) {
         Gson gson = new Gson();
         return "{\"numBooks\": " + bookRepository.count() + ", \"page\": " + offset + ", \"size\": " + limit + ", \"books\": " + gson.toJson(books) + "}";
@@ -88,7 +128,7 @@ public class BookController {
 
     private ResponseEntity getIdResponse(@PathVariable("userId") long _id) {
         Book _book = bookRepository.findById(_id).get();
-        if(_book==null)
+        if (_book == null)
             return buildResponse(HttpStatus.NO_CONTENT, _book);
         return buildResponse(HttpStatus.OK, _book);
     }
