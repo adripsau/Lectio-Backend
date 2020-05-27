@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS `club` (
   `private` tinyint(1) unsigned NOT NULL DEFAULT 0,
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `club_name_club_description` (`club_name`,`club_description`),
   KEY `club_book_id_fk` (`book_id`),
   KEY `club_creator_fk` (`creator`),
   CONSTRAINT `club_book_id_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

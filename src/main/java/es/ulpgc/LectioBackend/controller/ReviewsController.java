@@ -37,7 +37,7 @@ public class ReviewsController {
 
 
     /**
-     * petition: /api/reviews?user_id=8&book_id=4
+     * petition: [GET] /api/reviews?user_id=8&book_id=4
      *
      * @param user_id
      * @param book_id
