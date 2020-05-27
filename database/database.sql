@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Versión del servidor:         10.4.12-MariaDB - mariadb.org binary distribution
 -- SO del servidor:              Win64
--- HeidiSQL Versión:             11.0.0.5919
+-- HeidiSQL Versión:             10.2.0.5599
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -35,7 +35,6 @@ REPLACE INTO `booklists` (`book_id`, `list_id`) VALUES
 	(2, 8),
 	(2, 9),
 	(3, 1),
-	(3, 8),
 	(4, 8),
 	(5, 1),
 	(5, 2),
@@ -86,21 +85,19 @@ CREATE TABLE IF NOT EXISTS `club` (
   `creator` int(11) NOT NULL DEFAULT 0,
   `read_time` date DEFAULT NULL,
   `num_subscribers` int(11) unsigned NOT NULL DEFAULT 0,
-  `private` tinyint(1) unsigned NOT NULL DEFAULT 0,
-  `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `club_name_club_description` (`club_name`,`club_description`),
+  UNIQUE KEY `club_name` (`club_name`),
   KEY `club_book_id_fk` (`book_id`),
   KEY `club_creator_fk` (`creator`),
   CONSTRAINT `club_book_id_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `club_creator_fk` FOREIGN KEY (`creator`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 
 -- Volcando datos para la tabla lectio.club: ~2 rows (aproximadamente)
 /*!40000 ALTER TABLE `club` DISABLE KEYS */;
-REPLACE INTO `club` (`id`, `club_name`, `club_description`, `book_id`, `creator`, `read_time`, `num_subscribers`, `private`, `password`) VALUES
-	(5, 'Los Pocholos', 'Vamos a aprender y leer mucho :)', NULL, 33, NULL, 0, 0, NULL),
-	(21, 'Los chunguitos', 'Libros para gente con problemas', NULL, 32, NULL, 2, 1, '$2a$10$5EPZEIcPHbet5ssOSt6.2eGxLheX0xZ2cIXNtWNvcnBsaAE0cGYia');
+REPLACE INTO `club` (`id`, `club_name`, `club_description`, `book_id`, `creator`, `read_time`, `num_subscribers`) VALUES
+	(5, 'Los Pocholos', 'Vamos a aprender y leer mucho :)', NULL, 33, NULL, 1),
+	(23, 'Los Chichos', 'Vamos a aprender y leer mucho :)', NULL, 32, NULL, 1);
 /*!40000 ALTER TABLE `club` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.club_subscribers
@@ -114,10 +111,11 @@ CREATE TABLE IF NOT EXISTS `club_subscribers` (
   CONSTRAINT `club_subs_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.club_subscribers: ~1 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.club_subscribers: ~0 rows (aproximadamente)
 /*!40000 ALTER TABLE `club_subscribers` DISABLE KEYS */;
 REPLACE INTO `club_subscribers` (`club_id`, `user_id`) VALUES
-	(21, 32);
+	(5, 33),
+	(23, 33);
 /*!40000 ALTER TABLE `club_subscribers` ENABLE KEYS */;
 
 -- Volcando estructura para tabla lectio.reviews

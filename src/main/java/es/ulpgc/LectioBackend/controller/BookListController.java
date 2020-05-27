@@ -81,6 +81,26 @@ public class BookListController {
         }
     }
 
+    @RequestMapping(path = "/lists/{list_id}", method = {RequestMethod.DELETE})
+    public ResponseEntity deleteBookFromList(@RequestParam long bookId, @PathVariable(value = "list_id") long list_id) {
+        try {
+            if(bookRepository.findById(bookId).isEmpty())
+                return buildResponse(HttpStatus.NOT_FOUND, "{ \"message\": \"There was a problem, this book doesn't exists\" }");
+
+            if(userListRepository.findById(list_id).isEmpty())
+                return buildResponse(HttpStatus.NOT_FOUND, "{ \"message\": \"There was a problem, this list doesn't exists\" }");
+
+            if(bookListRepository.findById(new BookListId(list_id,bookId)).isEmpty())
+                return buildResponse(HttpStatus.NOT_FOUND, "{ \"message\": \"There was a problem, specified book is not on specified list\" }");
+
+            bookListRepository.deleteById(new BookListId(list_id,bookId));
+
+            return buildResponse(HttpStatus.OK,"{ \"message\": \"Deleted successfully\" }");
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't delete from list\" }");
+        }
+    }
+
 
     private String convertToJson(UserList userList, List<Book> books) {
         Gson gson = new Gson();
