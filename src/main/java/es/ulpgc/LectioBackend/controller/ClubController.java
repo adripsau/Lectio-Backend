@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.ulpgc.LectioBackend.model.Club;
 import es.ulpgc.LectioBackend.model.ClubSubscribers;
 import es.ulpgc.LectioBackend.model.ClubSubscribersId;
+import es.ulpgc.LectioBackend.model.Rol;
 import es.ulpgc.LectioBackend.repository.ClubRepository;
 import es.ulpgc.LectioBackend.repository.ClubSubscribersRepository;
+import es.ulpgc.LectioBackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,9 @@ public class ClubController {
 
     @Autowired
     ClubSubscribersRepository clubSubscribersRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     /**
      * body: {
@@ -200,6 +205,28 @@ public class ClubController {
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT,
                     "{ \"message\": \"Couldn't delete the club, there was a conflict\" }");
+        }
+    }
+
+    /**
+     * Example URL: [GET] /api/clubs/librarian/{user_id}
+     *
+     * @return Array
+     */
+    @RequestMapping(path = "/clubs/librarian/{user_id}", method = {RequestMethod.GET})
+    public ResponseEntity getCreatedClubs(@PathVariable(value = "user_id") long user_id) {
+        try {
+            if (userRepository.findById(user_id).get().getRole().compareTo(Rol.Librarian) != 0) {
+                return buildResponse(HttpStatus.CONFLICT,
+                        "{ \"message\": \"User id provided isn't a librarian\" }");
+            }
+
+            List<Club> clubs = clubRepository.findClubsCreatedBy(user_id);
+
+            return buildResponse(HttpStatus.OK, clubs);
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT,
+                    "{ \"message\": \"Couldn't find clubs, there was a conflict\" }");
         }
     }
 
