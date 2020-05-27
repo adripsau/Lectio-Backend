@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Versión del servidor:         10.4.12-MariaDB - mariadb.org binary distribution
 -- SO del servidor:              Win64
--- HeidiSQL Versión:             10.2.0.5599
+-- HeidiSQL Versión:             11.0.0.5919
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `booklists` (
   CONSTRAINT `list_id_fk` FOREIGN KEY (`list_id`) REFERENCES `userlists` (`list_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.booklists: ~15 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.booklists: ~14 rows (aproximadamente)
 /*!40000 ALTER TABLE `booklists` DISABLE KEYS */;
 REPLACE INTO `booklists` (`book_id`, `list_id`) VALUES
 	(1, 1),
@@ -100,6 +100,27 @@ REPLACE INTO `club` (`id`, `club_name`, `club_description`, `book_id`, `creator`
 	(23, 'Los Chichos', 'Vamos a aprender y leer mucho :)', NULL, 32, NULL, 1);
 /*!40000 ALTER TABLE `club` ENABLE KEYS */;
 
+-- Volcando estructura para tabla lectio.club_punctuation
+DROP TABLE IF EXISTS `club_punctuation`;
+CREATE TABLE IF NOT EXISTS `club_punctuation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `club_id` int(11) unsigned NOT NULL,
+  `punctuation` int(11) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id_club_id` (`user_id`,`club_id`),
+  KEY `club_punctuation_club_id_fk` (`club_id`),
+  KEY `club_punctuation_user_id_fk` (`user_id`),
+  CONSTRAINT `club_punctuation_club_id_fk` FOREIGN KEY (`club_id`) REFERENCES `club` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `club_punctuation_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+-- Volcando datos para la tabla lectio.club_punctuation: ~1 rows (aproximadamente)
+/*!40000 ALTER TABLE `club_punctuation` DISABLE KEYS */;
+REPLACE INTO `club_punctuation` (`id`, `user_id`, `club_id`, `punctuation`) VALUES
+	(1, 33, 23, 3);
+/*!40000 ALTER TABLE `club_punctuation` ENABLE KEYS */;
+
 -- Volcando estructura para tabla lectio.club_subscribers
 DROP TABLE IF EXISTS `club_subscribers`;
 CREATE TABLE IF NOT EXISTS `club_subscribers` (
@@ -111,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `club_subscribers` (
   CONSTRAINT `club_subs_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Volcando datos para la tabla lectio.club_subscribers: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla lectio.club_subscribers: ~2 rows (aproximadamente)
 /*!40000 ALTER TABLE `club_subscribers` DISABLE KEYS */;
 REPLACE INTO `club_subscribers` (`club_id`, `user_id`) VALUES
 	(5, 33),
