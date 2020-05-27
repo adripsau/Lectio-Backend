@@ -11,15 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -38,18 +33,19 @@ public class ClubController {
     @Autowired
     ClubPunctuationRepository clubPunctuationRepository;
 
+
     /**
      * body: {
-     * * "club_name": String,
-     * * "club_description": String,
-     * * "creator": String ID,
-     * * "read_time": (Optional)Epoch milliseconds only if book_id is defined,
-     * * "book_id": (Optional)Int ID only if read_time is defined
-     * * }
-     * <p>
-     * Example URL: [POST] /api/clubs
+     *      "club_name": String,
+     *      "club_description": String,
+     *      "creator": String ID,
+     *      "read_time": (Optional)Epoch milliseconds only if book_id is defined,
+     *      "book_id": (Optional)Int ID only if read_time is defined
+     * }
      *
-     * @param club
+     * URL: [POST] /api/clubs
+     *
+     * @return Club
      */
     @RequestMapping(path = "/clubs", method = {RequestMethod.POST})
     public ResponseEntity createClub(@RequestBody Club club) {
@@ -73,10 +69,11 @@ public class ClubController {
         }
     }
 
+
     /**
-     * Example URL: [GET] /api/clubs
+     * URL: [GET] /api/clubs
      *
-     * @return Array
+     * @return List
      */
     @RequestMapping(path = "/clubs", method = {RequestMethod.GET})
     public ResponseEntity getClubs() {
@@ -88,8 +85,11 @@ public class ClubController {
         }
     }
 
+
     /**
-     * Example URL: [POST] /api/clubs/subscribe?user_id={user_id}&club_id={club_id}
+     * URL: [POST] /api/clubs/subscribe?user_id={user_id}&club_id={club_id}
+     *
+     * @return ClubSubscribers
      */
     @RequestMapping(path = "/clubs/subscribe", method = {RequestMethod.POST})
     public ResponseEntity subscribeClub(@RequestParam(value = "user_id") long userId, @RequestParam(value = "club_id") long clubId, @RequestBody(required = false) String password) {
@@ -112,8 +112,11 @@ public class ClubController {
         }
     }
 
+
     /**
-     * Example URL: [DELETE] /api/clubs/unsubscribe?user_id={user_id}&club_id={club_id}
+     * URL: [DELETE] /api/clubs/unsubscribe?user_id={user_id}&club_id={club_id}
+     *
+     * @return message String
      */
     @RequestMapping(path = "/clubs/unsubscribe", method = {RequestMethod.DELETE})
     public ResponseEntity unsubscribeClub(@RequestParam(value = "user_id") long userId, @RequestParam(value = "club_id") long clubId, @RequestBody(required = false) String password) {
@@ -137,10 +140,11 @@ public class ClubController {
         }
     }
 
+
     /**
-     * Example URL: [GET] /api/clubs/{user_id}
+     * URL: [GET] /api/clubs/{user_id}
      *
-     * @return Array
+     * @return List
      */
     @RequestMapping(path = "/clubs/{user_id}", method = {RequestMethod.GET})
     public ResponseEntity getSubscribedClubs(@PathVariable(value = "user_id") long user_id) {
@@ -159,15 +163,17 @@ public class ClubController {
         }
     }
 
+
     /**
      * body: {
-     * *
-     * * 	"book_id": 7,
-     * * 	"club_id": 21,
-     * * 	"date": 1590490709615,
-     * * }
-     * <p>
-     * Example URL: [PUT] /api/clubs
+     *      "book_id": long,
+     *      "club_id": long,
+     *      "date": timestamp of 13 digits(millis)
+     * }
+     *
+     * URL: [PUT] /api/clubs
+     *
+     * @return Club
      */
     @RequestMapping(path = "/clubs", method = {RequestMethod.PUT})
     public ResponseEntity setToReadBook(@RequestBody String json) {
@@ -190,8 +196,11 @@ public class ClubController {
         }
     }
 
+
     /**
-     * Example URL: [DELETE] /api/clubs/{club_id}
+     * URL: [DELETE] /api/clubs/{club_id}
+     *
+     * @return message String
      */
     @RequestMapping(path = "/clubs/{club_id}", method = {RequestMethod.DELETE})
     public ResponseEntity deleteClub(@PathVariable(value = "club_id") long clubId) {
@@ -211,10 +220,11 @@ public class ClubController {
         }
     }
 
+
     /**
-     * Example URL: [GET] /api/clubs/librarian/{user_id}
+     * URL: [GET] /api/clubs/librarian/{user_id}
      *
-     * @return Array
+     * @return List
      */
     @RequestMapping(path = "/clubs/librarian/{user_id}", method = {RequestMethod.GET})
     public ResponseEntity getCreatedClubs(@PathVariable(value = "user_id") long user_id) {
@@ -233,6 +243,7 @@ public class ClubController {
         }
     }
 
+
     /**
      * body: {
      *     "user_id": long,
@@ -240,14 +251,14 @@ public class ClubController {
      *     "punctuation": long
      * }
      *
-     * Example
+     * #### Example ####
      * body: {
      *     "user_id": 33,
      *     "club_id": 23,
      *     "punctuation": 3
      * }
      *
-     * Example URL: [POST] /api/clubs/punctuation
+     * URL: [POST] /api/clubs/punctuation
      *
      * @return ClubPunctuation
      */
@@ -273,6 +284,12 @@ public class ClubController {
         }
     }
 
+
+    /**
+     * URL: [GET] /api/clubs/{club_id}/punctuation/{user_id}
+     *
+     * @return ClubPunctuation
+     */
     @RequestMapping(path = "/clubs/{club_id}/punctuation/{user_id}", method = {RequestMethod.GET})
     public ResponseEntity haveThisUserPunctuate(@PathVariable(value = "club_id") long club_id, @PathVariable(value = "user_id") long user_id) {
         try {
@@ -296,6 +313,7 @@ public class ClubController {
                 .headers(setHeaders())
                 .body(_body);
     }
+
 
     private HttpHeaders setHeaders() {
         HttpHeaders headers = new HttpHeaders();

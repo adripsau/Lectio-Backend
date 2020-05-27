@@ -20,6 +20,31 @@ public class BookController {
     @Autowired
     private BookRepository bookRepository;
 
+
+    /**
+     * body: {
+     *      "title": String,
+     *      "author": String,
+     *      "publisher": String,
+     *      "pages": Number as String,
+     *      "isbn": Number as String,
+     *      "genres": Array of Strings
+     * }
+     *
+     * #### Example ####
+     * body: {
+     *      "title":"Rimas y leyendas",
+     *      "author":"Gustavo Adolfo Becquer",
+     *      "publisher":"Austral",
+     *      "pages": "345",
+     *      "isbn":"89894421266509",
+     *      "genres": ["Science fiction", "Adventure"]
+     * }
+     *
+     * URL: [POST] /api/books/
+     *
+     * @return Book
+     */
     @RequestMapping(path = "/books", method = {RequestMethod.POST})
     public ResponseEntity createBook(@RequestBody Book book) {
         try {
@@ -29,6 +54,13 @@ public class BookController {
         }
     }
 
+
+    /**
+     * URL: [GET] /api/books?limit={num_limit}&offset={page}
+     * Example: /api/books?limit=3&offset=0
+     *
+     * @return List
+     */
     @RequestMapping(path = "/books", method = {RequestMethod.GET})
     public ResponseEntity getAllBooks(@RequestParam(required = false) String offset, @RequestParam(required = false, defaultValue = "0") String limit) {
         try {
@@ -48,6 +80,12 @@ public class BookController {
         }
     }
 
+
+    /**
+     * URL: [GET] /api/books/{bookId}
+     *
+     * @return Book
+     */
     @RequestMapping(path = "/books/{bookId}", method = {RequestMethod.GET})
     public ResponseEntity getBookById(@PathVariable(value = "bookId") long id) {
         try {
@@ -57,15 +95,13 @@ public class BookController {
         }
     }
 
+
     /**
      * Example URL: [GET] /api/books/search?title={title}&author={author}&genre={genre}&publisher={publisher}
      *
-     * params are optional but you must add at least one
+     * Note: params are optional but you must add at least one
      *
-     * @param title
-     * @param author
-     * @param genre
-     * @param publisher
+     * @return List
      */
     @RequestMapping(path = "/books/search", method = {RequestMethod.GET})
     public ResponseEntity searchBookByName(@RequestParam(value = "title", required = false, defaultValue = "") String title,
@@ -89,6 +125,7 @@ public class BookController {
         }
     }
 
+
     private ResponseEntity searchByName(String title) {
         List<Book> books = bookRepository.findByName(title);
         if (books.size() == 0)
@@ -97,10 +134,12 @@ public class BookController {
         return buildResponse(HttpStatus.OK, books);
     }
 
+
     private String convertToJson(int offset, int limit, List<Book> books) {
         Gson gson = new Gson();
         return "{\"numBooks\": " + bookRepository.count() + ", \"page\": " + offset + ", \"size\": " + limit + ", \"books\": " + gson.toJson(books) + "}";
     }
+
 
     private Book store(@RequestBody Book book) {
         return bookRepository
@@ -108,11 +147,13 @@ public class BookController {
                         book.getGenres(), book.getSynopsis()));
     }
 
+
     private HttpHeaders setHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
         return headers;
     }
+
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
@@ -120,11 +161,13 @@ public class BookController {
                 .body(_body);
     }
 
+
     private ResponseEntity<String> buildPaginatedResponse(HttpStatus _status, String response) {
         return ResponseEntity.status(_status)
                 .headers(setHeaders())
                 .body(response);
     }
+
 
     private ResponseEntity getIdResponse(@PathVariable("userId") long _id) {
         Book _book = bookRepository.findById(_id).get();

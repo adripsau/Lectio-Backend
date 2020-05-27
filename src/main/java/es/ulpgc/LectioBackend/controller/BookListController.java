@@ -31,6 +31,15 @@ public class BookListController {
     @Autowired
     private BookRepository bookRepository;
 
+
+    /**
+     * URL: [GET] /api/users/{user_id}/list/{list_name_or_list_id}
+     *
+     * Example 1: /api/users/32/list/9
+     * Example 2: /api/users/32/list/Anime
+     *
+     * @return List
+     */
     @RequestMapping(path = "/users/{id}/list/{list_name}", method = {RequestMethod.GET})
     public ResponseEntity getBookList(@PathVariable(value = "id") long id, @PathVariable(value = "list_name") String list_name) {
         try {
@@ -51,6 +60,12 @@ public class BookListController {
         }
     }
 
+
+    /**
+     * URL: [GET] /api/users/{user_id}/list/
+     *
+     * @return List
+     */
     @RequestMapping(path = "/users/{id}/list", method = {RequestMethod.GET})
     public ResponseEntity getLists(@PathVariable(value = "id") long id) {
         try {
@@ -61,6 +76,25 @@ public class BookListController {
         }
     }
 
+
+    /**
+     * body: {
+     *     "user_id": long,
+     *     "list_name": String,
+     *     "list_description": String
+     * }
+     *
+     * #### Example ####
+     * body: {
+     *     "user_id": 32,
+     *     "list_name": "Bacano",
+     *     "list_description": "Unos libros bien chingones"
+     * }
+     *
+     * URL: [POST] /api/users/{user_id}/list/
+     *
+     * @return UserList
+     */
     @RequestMapping(path = "/users/{id}/list", method = {RequestMethod.POST})
     public ResponseEntity createList(@RequestBody UserList userList) {
         try {
@@ -70,6 +104,23 @@ public class BookListController {
         }
     }
 
+
+    /**
+     * body: {
+     *     "book_id": long,
+     *     "list_id": long
+     * }
+     *
+     * #### Example ####
+     * body: {
+     *     "book_id": 32,
+     *     "list_id": 23
+     * }
+     *
+     * URL: [POST] /api/lists/
+     *
+     * @return BookList
+     */
     @RequestMapping(path = "/lists", method = {RequestMethod.POST})
     public ResponseEntity addBookToList(@RequestBody BookListId bookListId) {
         try {
@@ -81,6 +132,13 @@ public class BookListController {
         }
     }
 
+
+    /**
+     * URL: [DELETE] /api/lists/{list_id}?bookId={bookId}
+     * Example: /api/lists/9?bookId=4
+     *
+     * @return message String
+     */
     @RequestMapping(path = "/lists/{list_id}", method = {RequestMethod.DELETE})
     public ResponseEntity deleteBookFromList(@RequestParam long bookId, @PathVariable(value = "list_id") long list_id) {
         try {
@@ -107,17 +165,20 @@ public class BookListController {
         return "{\"list_name\": \"" + userList.getList_name() + "\" , \"list_description\": \"" + userList.getList_description() + "\", \"books\": " + gson.toJson(books) + "}";
     }
 
+
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
                 .headers(setHeaders())
                 .body(_body);
     }
 
+
     private HttpHeaders setHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
         return headers;
     }
+
 
     public boolean isNumeric(String strNum) {
         if (strNum == null)
@@ -131,6 +192,7 @@ public class BookListController {
         return true;
     }
 
+
     private UserList getNameResponse(long id, @PathVariable("userId") String list_name) {
         UserList userList = userListRepository.getUserListId(id, list_name);
         if (userList.getList_name().equals(""))
@@ -139,16 +201,19 @@ public class BookListController {
         return userList;
     }
 
+
     private UserList getIDResponse(@PathVariable("userId") String list_id) {
         long _id = Long.parseLong(list_id);
         UserList userList = userListRepository.findById(_id).get();
         return userList;
     }
 
+
     private UserList storeUserList(UserList userList) {
         return userListRepository
                 .save(new UserList(userList.getUser_id(), userList.getList_name(), userList.getList_description()));
     }
+
 
     private BookList storeBookList(BookListId bookListId) {
 
@@ -160,5 +225,4 @@ public class BookListController {
         else
             return null;
     }
-
 }

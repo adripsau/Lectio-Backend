@@ -37,10 +37,11 @@ public class ReviewsController {
 
 
     /**
-     * petition: [GET] /api/reviews?user_id=8&book_id=4
+     * URL: [GET] /api/reviews?user_id={user_id}&book_id={book_id}
      *
-     * @param user_id
-     * @param book_id
+     * Example: [GET] /api/reviews?user_id=8&book_id=4
+     *
+     * @return Review
      */
     @RequestMapping(path = "/reviews", method = {RequestMethod.GET})
     public ResponseEntity getReview(@RequestParam long user_id, @RequestParam long book_id) {
@@ -59,15 +60,18 @@ public class ReviewsController {
         }
     }
 
+
     /**
      * body: {
-     * "book_id": 5,
-     * "user_id": 33,
-     * "comment": "It was nice",
-     * "punctuation": 3
+     *      "book_id": long,
+     *      "user_id": long,
+     *      "comment": String,
+     *      "punctuation": long between 1 to 5
      * }
      *
-     * @param review
+     * URL: [POST] /api/reviews/
+     *
+     * @return Reviews
      */
     @RequestMapping(path = "/reviews", method = {RequestMethod.POST})
     public ResponseEntity createReview(@RequestBody Reviews review) {
@@ -92,13 +96,12 @@ public class ReviewsController {
         }
     }
 
+
     /**
-     * petition: /api/reviews/{book_id}?limit={num_limit}&offset={page}
-     * example: /api/reviews/4?limit=3&offset=0
+     * URL: [GET] /api/reviews/{book_id}?limit={num_limit}&offset={page}
+     * Example: /api/reviews/4?limit=3&offset=0
      *
-     * @param offset
-     * @param limit
-     * @param bookId
+     * @return List
      */
     @RequestMapping(path = "/reviews/{bookId}", method = {RequestMethod.GET})
     public ResponseEntity getReviewsByBookId(@RequestParam(required = false) String offset, @RequestParam(required = false, defaultValue = "0") String limit, @PathVariable long bookId) {
@@ -126,10 +129,12 @@ public class ReviewsController {
                 .body(response);
     }
 
+
     private String convertToJson(int offset, int limit, List<Reviews> reviews, long bookId) {
         Gson gson = new Gson();
         return "{\"numReviews\": " + reviewsRepository.countReviews(bookId) + ", \"page\": " + offset + ", \"size\": " + limit + ", \"reviews\": " + gson.toJson(reviews) + "}";
     }
+
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
@@ -137,11 +142,10 @@ public class ReviewsController {
                 .body(_body);
     }
 
+
     private HttpHeaders setHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
         return headers;
     }
-
-
 }

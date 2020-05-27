@@ -22,9 +22,19 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+
     @Autowired
     private UserListRepository listRepository;
 
+
+    /**
+     * URL: [GET] /api/users/{userId_or_email}
+     *
+     * Example 1: /api/users/33
+     * Example 2: /api/users/jose@email.com
+     *
+     * @return Review
+     */
     @RequestMapping(path = "/users/{userId}", method = {RequestMethod.GET})
     public ResponseEntity getUserByIdOrEmail(@PathVariable(value = "userId") String id) {
         try {
@@ -35,6 +45,11 @@ public class UserController {
     }
 
 
+    /**
+     * URL: [GET] /api/users/
+     *
+     * @return List
+     */
     @RequestMapping(path = "/users", method = {RequestMethod.GET})
     public ResponseEntity getAllUsers() {
         try {
@@ -45,6 +60,22 @@ public class UserController {
         }
     }
 
+
+    /**
+     * body: {
+     *     "firstName": String,
+     *     "lastName": String,
+     *     "email": String",
+     *     "password": String,
+     *     "role": Student or Librarian or Administrator,
+     *     "photo": String (optional),
+     *     "additional": String (optional)
+     * }
+     *
+     * URL: [POST] /api/users/
+     *
+     * @return User
+     */
     @RequestMapping(path = "/users", method = {RequestMethod.POST})
     public ResponseEntity createUser(@RequestBody User user) {
         try {
@@ -61,6 +92,12 @@ public class UserController {
         }
     }
 
+
+    /**
+     * URL: [DELETE] /api/users/{userId}
+     *
+     * @return String
+     */
     @RequestMapping(path = "/users/{userId}", method = {RequestMethod.DELETE})
     public ResponseEntity deleteUser(@PathVariable(value = "userId") long id) {
         try {
@@ -71,6 +108,21 @@ public class UserController {
         }
     }
 
+
+    /**
+     * body: {
+     *     "firstName": String,
+     *     "lastName": String,
+     *     "email": String",
+     *     "role": Student or Librarian or Administrator,
+     *     "photo": String (optional),
+     *     "additional": String (optional)
+     * }
+     *
+     * URL: [PUT] /api/users/{userId}
+     *
+     * @return User
+     */
     @RequestMapping(path = "/users/{userId}", method = {RequestMethod.PUT})
     public ResponseEntity updateUser(@PathVariable(value = "userId") long id, @RequestBody User user) {
         try {
@@ -82,11 +134,13 @@ public class UserController {
         }
     }
 
+
     private HttpHeaders setHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
         return headers;
     }
+
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
@@ -94,11 +148,13 @@ public class UserController {
                 .body(_body);
     }
 
+
     private User store(@RequestBody User user) {
         return userRepository
                 .save(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getPhoto(),
                         user.getRole(), user.getAdditional()));
     }
+
 
     private String encodePassword(String password) {
         if (password.length() > 2) {
@@ -107,6 +163,7 @@ public class UserController {
         }
         return password;
     }
+
 
     public boolean isNumeric(String strNum) {
         if (strNum == null)
@@ -120,6 +177,7 @@ public class UserController {
         return true;
     }
 
+
     private ResponseEntity getEmailResponse(@PathVariable("userId") String email) {
         User _user = userRepository.findByEmail(email);
         if (_user.getFirstName().equals(""))
@@ -128,11 +186,13 @@ public class UserController {
         return buildResponse(HttpStatus.OK, _user);
     }
 
+
     private ResponseEntity getIDResponse(@PathVariable("userId") String id) {
         long _id = Long.parseLong(id);
         User _user = userRepository.findById(_id).get();
         return buildResponse(HttpStatus.OK, _user);
     }
+
 
     private void storeUserList(UserList userList) {
         listRepository
