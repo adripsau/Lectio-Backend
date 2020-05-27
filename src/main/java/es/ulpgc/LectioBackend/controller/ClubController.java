@@ -273,6 +273,22 @@ public class ClubController {
         }
     }
 
+    @RequestMapping(path = "/clubs/{club_id}/punctuation/{user_id}", method = {RequestMethod.GET})
+    public ResponseEntity haveThisUserPunctuate(@PathVariable(value = "club_id") long club_id, @PathVariable(value = "user_id") long user_id) {
+        try {
+            ClubPunctuation club_punctuation = clubPunctuationRepository.getClubPunctuationByUserIdAndClubId(user_id, club_id);
+
+            if (club_punctuation == null) {
+                return buildResponse(HttpStatus.NO_CONTENT,
+                        "{ \"message\": \"Couldn't find club punctuation with user_id " + user_id + " and club_id " + club_id + "\" }");
+            }
+            return buildResponse(HttpStatus.OK, club_punctuation);
+
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.NOT_FOUND,
+                    "{ \"message\": \"Couldn't find club punctuation with user_id " + user_id + " and club_id " + club_id + "\" }");
+        }
+    }
 
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
