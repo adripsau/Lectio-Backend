@@ -2,10 +2,8 @@ package es.ulpgc.LectioBackend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.ulpgc.LectioBackend.model.Club;
-import es.ulpgc.LectioBackend.model.ClubSubscribers;
-import es.ulpgc.LectioBackend.model.ClubSubscribersId;
-import es.ulpgc.LectioBackend.model.Rol;
+import es.ulpgc.LectioBackend.model.*;
+import es.ulpgc.LectioBackend.repository.ClubPunctuationRepository;
 import es.ulpgc.LectioBackend.repository.ClubRepository;
 import es.ulpgc.LectioBackend.repository.ClubSubscribersRepository;
 import es.ulpgc.LectioBackend.repository.UserRepository;
@@ -16,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +34,9 @@ public class ClubController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    ClubPunctuationRepository clubPunctuationRepository;
 
     /**
      * body: {
@@ -229,6 +232,48 @@ public class ClubController {
                     "{ \"message\": \"Couldn't find clubs, there was a conflict\" }");
         }
     }
+
+    /**
+     * body: {
+     *     "user_id": long,
+     *     "club_id": long,
+     *     "punctuation": long
+     * }
+     *
+     * Example
+     * body: {
+     *     "user_id": 33,
+     *     "club_id": 23,
+     *     "punctuation": 3
+     * }
+     *
+     * Example URL: [POST] /api/clubs/punctuation
+     *
+     * @return ClubPunctuation
+     */
+    @RequestMapping(path = "/clubs/punctuation", method = {RequestMethod.POST})
+    public ResponseEntity createPunctuation(@RequestBody ClubPunctuation punctuation) {
+        try {
+            User user = userRepository.findById(punctuation.getUser_id()).get();
+
+            ClubSubscribers club = clubSubscribersRepository.findByClubIdAndUserId(punctuation.getUser_id(), punctuation.getClub_id());
+
+            if (club != null) {
+                ClubPunctuation newPunctuation = clubPunctuationRepository
+                        .save(new ClubPunctuation(punctuation.getUser_id(), punctuation.getClub_id(), punctuation.getPunctuation()));
+
+                return buildResponse(HttpStatus.CREATED, newPunctuation);
+            } else {
+                return buildResponse(HttpStatus.CONFLICT,
+                        "{ \"message\": \"You have to subscribe first to punctuate\" }");
+            }
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT,
+                    "{ \"message\": \"Couldn't create punctuation, there was a conflict\" }");
+        }
+    }
+
+
 
     private <T> ResponseEntity<T> buildResponse(HttpStatus _status, T _body) {
         return ResponseEntity.status(_status)
