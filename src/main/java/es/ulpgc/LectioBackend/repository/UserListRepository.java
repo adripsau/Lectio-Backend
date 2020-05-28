@@ -1,5 +1,6 @@
 package es.ulpgc.LectioBackend.repository;
 
+import es.ulpgc.LectioBackend.model.User;
 import es.ulpgc.LectioBackend.model.UserList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,7 @@ public interface UserListRepository extends JpaRepository<UserList, Long> {
 
     @Query(value="SELECT * FROM userlists WHERE user_id=?1", nativeQuery = true)
     List<UserList> findByUserId(long id);
+
+    @Query(value="SELECT * FROM userlists WHERE list_id=?1", nativeQuery = true)
+    UserList findByListId(long list_id);
 }

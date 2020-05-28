@@ -1,10 +1,9 @@
 package es.ulpgc.LectioBackend.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import es.ulpgc.LectioBackend.model.Book;
-import es.ulpgc.LectioBackend.model.BookList;
-import es.ulpgc.LectioBackend.model.BookListId;
-import es.ulpgc.LectioBackend.model.UserList;
+import es.ulpgc.LectioBackend.model.*;
 import es.ulpgc.LectioBackend.repository.BookListRepository;
 import es.ulpgc.LectioBackend.repository.BookRepository;
 import es.ulpgc.LectioBackend.repository.UserListRepository;
@@ -34,7 +33,7 @@ public class BookListController {
 
     /**
      * URL: [GET] /api/users/{user_id}/list/{list_name_or_list_id}
-     *
+     * <p>
      * Example 1: /api/users/32/list/9
      * Example 2: /api/users/32/list/Anime
      *
@@ -79,18 +78,18 @@ public class BookListController {
 
     /**
      * body: {
-     *     "user_id": long,
-     *     "list_name": String,
-     *     "list_description": String
+     * "user_id": long,
+     * "list_name": String,
+     * "list_description": String
      * }
-     *
+     * <p>
      * #### Example ####
      * body: {
-     *     "user_id": 32,
-     *     "list_name": "Bacano",
-     *     "list_description": "Unos libros bien chingones"
+     * "user_id": 32,
+     * "list_name": "Bacano",
+     * "list_description": "Unos libros bien chingones"
      * }
-     *
+     * <p>
      * URL: [POST] /api/users/{user_id}/list/
      *
      * @return UserList
@@ -107,14 +106,16 @@ public class BookListController {
 
     /**
      * body: {
-     *     "book_id": long,
-     *     "list_id": long
+     * "book_id": long,
+     * "list_id": long,
+     * "progress": String
      * }
      *
      * #### Example ####
      * body: {
-     *     "book_id": 32,
-     *     "list_id": 23
+     * "book_id": 32,
+     * "list_id": 23,
+     * "progress": "80"
      * }
      *
      * URL: [POST] /api/lists/
@@ -122,14 +123,47 @@ public class BookListController {
      * @return BookList
      */
     @RequestMapping(path = "/lists", method = {RequestMethod.POST})
-    public ResponseEntity addBookToList(@RequestBody BookListId bookListId) {
+    public ResponseEntity addBookToList(@RequestBody String json) {
         try {
-            if (storeBookList(bookListId) == null)
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(json);
+            long book_id = jsonNode.findValue("book_id").asLong();
+            long list_id = jsonNode.findValue("list_id").asLong();
+            String progressString = jsonNode.findValue("progress").asText();
+
+            long progress = updateProgress(book_id, list_id, progressString);
+
+            String finalProgress = "" + progress;
+
+            BookListId bookListId = new BookListId(list_id,book_id);
+
+            if (storeBookList(bookListId, finalProgress) == null)
                 return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't add to list\" }");
-            return buildResponse(HttpStatus.CREATED, storeBookList(bookListId));
+            return buildResponse(HttpStatus.CREATED, storeBookList(bookListId, finalProgress));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't add to list\" }");
         }
+    }
+
+    private long updateProgress(long book_id, long list_id, String progressString) {
+        UserList userList = userListRepository.findByListId(list_id);
+
+        List<UserList> userLists = userListRepository.findByUserId(userList.getUser_id());
+
+        long progress = Long.parseLong(progressString);
+        for (UserList ulist : userLists) {
+            BookList bookList = bookListRepository.getBookList(ulist.getList_id(), book_id);
+            if(bookList==null)
+                continue;
+            if (bookList.getProgress() > progress)
+                progress = bookList.getProgress();
+            if (bookList.getProgress() < progress) {
+                bookList.setProgress("" + progress);
+                bookListRepository.save(bookList);
+            }
+        }
+        return progress;
     }
 
 
@@ -142,23 +176,58 @@ public class BookListController {
     @RequestMapping(path = "/lists/{list_id}", method = {RequestMethod.DELETE})
     public ResponseEntity deleteBookFromList(@RequestParam long bookId, @PathVariable(value = "list_id") long list_id) {
         try {
-            if(bookRepository.findById(bookId).isEmpty())
+            if (bookRepository.findById(bookId).isEmpty())
                 return buildResponse(HttpStatus.NOT_FOUND, "{ \"message\": \"There was a problem, this book doesn't exists\" }");
 
-            if(userListRepository.findById(list_id).isEmpty())
+            if (userListRepository.findById(list_id).isEmpty())
                 return buildResponse(HttpStatus.NOT_FOUND, "{ \"message\": \"There was a problem, this list doesn't exists\" }");
 
-            if(bookListRepository.findById(new BookListId(list_id,bookId)).isEmpty())
+            if (bookListRepository.findById(new BookListId(list_id, bookId)).isEmpty())
                 return buildResponse(HttpStatus.NOT_FOUND, "{ \"message\": \"There was a problem, specified book is not on specified list\" }");
 
-            bookListRepository.deleteById(new BookListId(list_id,bookId));
+            bookListRepository.deleteById(new BookListId(list_id, bookId));
 
-            return buildResponse(HttpStatus.OK,"{ \"message\": \"Deleted successfully\" }");
+            return buildResponse(HttpStatus.OK, "{ \"message\": \"Deleted successfully\" }");
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't delete from list\" }");
         }
     }
 
+    /**
+     * URL: [POST] /api/book/progress
+     *
+     * body: {
+     * "book_id": long,
+     * "list_id": long,
+     * "progress": String
+     * }
+     * #### Example ####
+     * body: {
+     * "book_id": 32,
+     * "list_id": 23,
+     * "progress": "80"
+     * }
+     *
+     * @return message String
+     */
+    @RequestMapping(path = "/books/progress", method = {RequestMethod.POST})
+    public ResponseEntity saveBookProgress(@RequestBody String json) {
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(json);
+
+            long book_id = jsonNode.findValue("book_id").asLong();
+            long list_id = jsonNode.findValue("list_id").asLong();
+            String progressString = jsonNode.findValue("progress").asText();
+
+            updateProgress(book_id, list_id, progressString);
+
+            return buildResponse(HttpStatus.CREATED, "{ \"message\": \"Progress updated\" }");
+        } catch (Exception e) {
+            return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't add to list\" }");
+        }
+    }
 
     private String convertToJson(UserList userList, List<Book> books) {
         Gson gson = new Gson();
@@ -215,13 +284,13 @@ public class BookListController {
     }
 
 
-    private BookList storeBookList(BookListId bookListId) {
+    private BookList storeBookList(BookListId bookListId, String progress) {
 
         BookList bookList = bookListRepository.getBookList(bookListId.getList_id(), bookListId.getBook_id());
 
         if (bookList == null)
             return bookListRepository
-                    .save(new BookList(new BookListId(bookListId.getList_id(), bookListId.getBook_id())));
+                    .save(new BookList(new BookListId(bookListId.getList_id(), bookListId.getBook_id()), progress));
         else
             return null;
     }
