@@ -16,8 +16,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     public List<Book> findByName(String title);
 
     @Query(value="SELECT * FROM Books WHERE Books.title LIKE %:title% " +
-                                       "AND Books.author LIKE %:author% " +
-                                       "AND Books.genres LIKE %:genre% " +
-                                       "AND Books.publisher LIKE %:publisher%", nativeQuery = true)
-    List<Book> findByFilter(String title, String author, String genre, String publisher);
+            "AND Books.author LIKE %:author% " +
+            "AND Books.genres LIKE %:genre% " +
+            "AND Books.publisher LIKE %:publisher% " +
+            "LIMIT :limit OFFSET :offset", nativeQuery = true)
+    List<Book> findByFilter(String title, String author, String genre, String publisher, int limit, int offset);
 }

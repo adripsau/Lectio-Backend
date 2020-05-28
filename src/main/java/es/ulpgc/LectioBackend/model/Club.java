@@ -4,7 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
+import java.util.Locale;
 
 @Entity
 @Table(name = "club")
@@ -39,12 +44,21 @@ public class Club {
     public Club() {
     }
 
-    public Club(String club_name, String club_description, Long book_id, long creator, Date read_time) {
+    public Club(String club_name, String club_description, Long book_id, long creator, String read_time) {
         this.club_name = club_name;
         this.club_description = club_description;
         this.book_id = book_id;
         this.creator = creator;
-        this.read_time = read_time;
+        this.read_time = getDate(read_time);
+    }
+
+
+    private Date getTimeToRead(String read_time) {
+        if (read_time.equals("Weekly"))
+            return new Date(Instant.now().plusSeconds(7*86400).toEpochMilli());
+        if (read_time.equals("Monthly"))
+            return new Date(Instant.now().plusSeconds(30*86400).toEpochMilli());
+        return null;
     }
 
     public long getId() {
@@ -87,12 +101,12 @@ public class Club {
         this.creator = creator;
     }
 
-    public Date getRead_time() {
-        return read_time;
+    public String getRead_time() {
+        return (read_time == null) ? null : getStringFromDate(read_time);
     }
 
-    public void setRead_time(Date read_time) {
-        this.read_time = read_time;
+    public void setRead_time(String read_time) {
+        this.read_time = getTimeToRead(read_time);
     }
 
     public long getNum_subscribers() {
@@ -109,6 +123,28 @@ public class Club {
 
     public void decreaseSubscribers() {
         num_subscribers--;
+    }
+
+    private Date getDate(String read_time) {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK);
+
+        Date date = null;
+        try {
+            date = format.parse(read_time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return date;
+    }
+
+    private String getStringFromDate(Date read_time) {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK);
+
+        String date = null;
+        date = format.format(read_time);
+
+        return date;
     }
 }
 

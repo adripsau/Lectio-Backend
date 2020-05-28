@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,13 +37,13 @@ public class ClubController {
 
     /**
      * body: {
-     *      "club_name": String,
-     *      "club_description": String,
-     *      "creator": String ID,
-     *      "read_time": (Optional)Epoch milliseconds only if book_id is defined,
-     *      "book_id": (Optional)Int ID only if read_time is defined
+     * "club_name": String,
+     * "club_description": String,
+     * "creator": String ID,
+     * "read_time": (Optional)String (Monthly or Weekly),
+     * "book_id": (Optional)Int ID only if read_time is defined
      * }
-     *
+     * <p>
      * URL: [POST] /api/clubs
      *
      * @return Club
@@ -57,7 +58,6 @@ public class ClubController {
             if (club.getBook_id() != null && club.getRead_time() == null)
                 return buildResponse(HttpStatus.CONFLICT,
                         "{ \"message\": \"Couldn't create club, there wasn't any time to read the specified book\" }");
-
 
             Club newClub = new Club(club.getClub_name(), club.getClub_description(), club.getBook_id(),
                     club.getCreator(), club.getRead_time());
@@ -166,11 +166,11 @@ public class ClubController {
 
     /**
      * body: {
-     *      "book_id": long,
-     *      "club_id": long,
-     *      "date": timestamp of 13 digits(millis)
+     * "book_id": long,
+     * "club_id": long,
+     * "date": String (Monthly or Weekly)
      * }
-     *
+     * <p>
      * URL: [PUT] /api/clubs
      *
      * @return Club
@@ -182,17 +182,21 @@ public class ClubController {
             JsonNode jsonNode = mapper.readTree(json);
             long book_id = jsonNode.findValue("book_id").asLong();
             long club_id = jsonNode.findValue("club_id").asLong();
-            long date = jsonNode.findValue("date").asLong();
-            Date finishDate = new Date(date);
+            String finishDate = jsonNode.findValue("date").asText();
 
             Club club = clubRepository.findById(club_id).get();
             club.setBook_id(book_id);
             club.setRead_time(finishDate);
 
+            if (club.getRead_time() == null) {
+                return buildResponse(HttpStatus.CONFLICT,
+                        "{ \"message\": \"Couldn't update club, read time must be Monthly or Weekly\" }");
+            }
+
             return buildResponse(HttpStatus.CREATED, clubRepository.save(club));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT,
-                    "{ \"message\": \"Couldn't create club, there was a conflict\" }");
+                    "{ \"message\": \"Couldn't update club, there was a conflict\" }");
         }
     }
 
@@ -246,18 +250,18 @@ public class ClubController {
 
     /**
      * body: {
-     *     "user_id": long,
-     *     "club_id": long,
-     *     "punctuation": long
+     * "user_id": long,
+     * "club_id": long,
+     * "punctuation": long
      * }
-     *
+     * <p>
      * #### Example ####
      * body: {
-     *     "user_id": 33,
-     *     "club_id": 23,
-     *     "punctuation": 3
+     * "user_id": 33,
+     * "club_id": 23,
+     * "punctuation": 3
      * }
-     *
+     * <p>
      * URL: [POST] /api/clubs/punctuation
      *
      * @return ClubPunctuation

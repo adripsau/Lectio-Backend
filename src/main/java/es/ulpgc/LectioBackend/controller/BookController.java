@@ -97,7 +97,7 @@ public class BookController {
 
 
     /**
-     * Example URL: [GET] /api/books/search?title={title}&author={author}&genre={genre}&publisher={publisher}
+     * Example URL: [GET] /api/books/search?limit={num_limit}&offset={page}&title={title}&author={author}&genre={genre}&publisher={publisher}
      *
      * Note: params are optional but you must add at least one
      *
@@ -107,7 +107,9 @@ public class BookController {
     public ResponseEntity searchBookByName(@RequestParam(value = "title", required = false, defaultValue = "") String title,
                                            @RequestParam(value = "author", required = false, defaultValue = "") String author,
                                            @RequestParam(value = "genre", required = false, defaultValue = "") String genre,
-                                           @RequestParam(value = "publisher", required = false, defaultValue = "") String publisher) {
+                                           @RequestParam(value = "publisher", required = false, defaultValue = "") String publisher,
+                                           @RequestParam(value = "offset", required = true) String offset,
+                                           @RequestParam(value = "limit", required = true) String limit) {
         try {
             if (author.equals("") && genre.equals("") && publisher.equals("")) {
                 if (title.equals(""))
@@ -115,7 +117,9 @@ public class BookController {
                 else
                     return searchByName(title);
             }
-            List<Book> books = bookRepository.findByFilter(title, author, genre, publisher);
+            List<Book> books = bookRepository.findByFilter(title, author, genre, publisher,
+                                                            (Integer.valueOf(limit)),
+                                                            (Integer.valueOf(offset) * Integer.valueOf(limit)));
             if (books.size() == 0)
                 return buildResponse(HttpStatus.NO_CONTENT, "{ \"message\": \"Couldn't find book with specified filters\" }");
 
