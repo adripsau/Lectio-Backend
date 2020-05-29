@@ -132,7 +132,11 @@ public class BookListController {
             long list_id = jsonNode.findValue("list_id").asLong();
             String progressString = jsonNode.findValue("progress").asText();
 
-            long progress = updateProgress(book_id, list_id, progressString);
+            Long progress = updateProgress(book_id, list_id, progressString);
+
+            if (progress == null) {
+                return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, progress must be lowest than number of the book pages or higher than zero.\" }");
+            }
 
             String finalProgress = "" + progress;
 
@@ -146,12 +150,18 @@ public class BookListController {
         }
     }
 
-    private long updateProgress(long book_id, long list_id, String progressString) {
+    private Long updateProgress(long book_id, long list_id, String progressString) {
         UserList userList = userListRepository.findByListId(list_id);
 
         List<UserList> userLists = userListRepository.findByUserId(userList.getUser_id());
 
+        long book_num_pages = Long.parseLong(bookRepository.findById(book_id).get().getPages());
+
         long progress = Long.parseLong(progressString);
+        if (progress > book_num_pages || progress < 0) {
+            return null;
+        }
+
         for (UserList ulist : userLists) {
             BookList bookList = bookListRepository.getBookList(ulist.getList_id(), book_id);
             if(bookList==null)
