@@ -166,12 +166,8 @@ public class BookListController {
             BookList bookList = bookListRepository.getBookList(ulist.getList_id(), book_id);
             if(bookList==null)
                 continue;
-            if (bookList.getProgress() > progress)
-                progress = bookList.getProgress();
-            if (bookList.getProgress() < progress) {
-                bookList.setProgress("" + progress);
-                bookListRepository.save(bookList);
-            }
+            bookList.setProgress("" + progress);
+            bookListRepository.save(bookList);
         }
         return progress;
     }
@@ -231,8 +227,10 @@ public class BookListController {
             long list_id = jsonNode.findValue("list_id").asLong();
             String progressString = jsonNode.findValue("progress").asText();
 
-            updateProgress(book_id, list_id, progressString);
-
+            Long progress = updateProgress(book_id, list_id, progressString);
+            if (progress == null) {
+                return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, progress must be lowest than number of the book pages or higher than zero.\" }");
+            }
             return buildResponse(HttpStatus.CREATED, "{ \"message\": \"Progress updated\" }");
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There was a problem, couldn't add to list\" }");
