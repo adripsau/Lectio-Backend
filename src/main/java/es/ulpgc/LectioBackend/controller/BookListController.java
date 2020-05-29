@@ -107,15 +107,13 @@ public class BookListController {
     /**
      * body: {
      * "book_id": long,
-     * "list_id": long,
-     * "progress": String
+     * "list_id": long
      * }
      *
      * #### Example ####
      * body: {
      * "book_id": 32,
-     * "list_id": 23,
-     * "progress": "80"
+     * "list_id": 23
      * }
      *
      * URL: [POST] /api/lists/

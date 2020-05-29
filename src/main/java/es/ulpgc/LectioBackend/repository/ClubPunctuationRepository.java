@@ -1,7 +1,6 @@
 package es.ulpgc.LectioBackend.repository;
 
 import es.ulpgc.LectioBackend.model.ClubPunctuation;
-import es.ulpgc.LectioBackend.model.Reviews;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
