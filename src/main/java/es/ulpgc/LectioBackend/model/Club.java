@@ -129,6 +129,8 @@ public class Club {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK);
 
         Date date = null;
+        if (read_time==null)
+            return null;
         try {
             date = format.parse(read_time);
         } catch (ParseException e) {
