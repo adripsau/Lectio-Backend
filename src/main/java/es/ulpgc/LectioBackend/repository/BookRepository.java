@@ -12,7 +12,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query(value="SELECT * FROM Books LIMIT ?2 OFFSET ?1 ", nativeQuery = true)
     public List<Book> findAll(int offset, int limit);
 
-    @Query(value="SELECT * FROM Books WHERE Books.title LIKE %:title%" +
+    @Query(value="SELECT * FROM Books WHERE Books.title LIKE %:title% " +
                                     "LIMIT :limit OFFSET :offset", nativeQuery = true)
     List<Book> findByName(String title, int limit, int offset);
 

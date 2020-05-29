@@ -116,16 +116,15 @@ public class BookController {
                 if (title.equals(""))
                     return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"You must specify book title at least\" }");
                 else {
-                    books = searchByName(title, (Integer.parseInt(limit)),
-                            (Integer.parseInt(offset) * Integer.parseInt(limit)));
+                    books = searchByName(title, (Integer.valueOf(limit)), (Integer.valueOf(offset) * Integer.valueOf(limit)));
                     if (books == null ){
                         return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There are a problem with title\" }");
                     }
                 }
             }else
             books = bookRepository.findByFilter(title, author, genre, publisher,
-                                                            (Integer.parseInt(limit)),
-                                                            (Integer.parseInt(offset) * Integer.parseInt(limit)));
+                                                            (Integer.valueOf(limit)),
+                                                            (Integer.valueOf(offset) * Integer.valueOf(limit)));
 
             int num_books= bookRepository.countBooksSearched(title, author, genre, publisher);
 
@@ -140,9 +139,8 @@ public class BookController {
     }
 
 
-    private List<Book> searchByName(String title, int offset, int limit) {
+    private List<Book> searchByName(String title, int limit, int offset) {
         List<Book> books = bookRepository.findByName(title, limit, offset);
-
         return books;
     }
 
