@@ -111,31 +111,39 @@ public class BookController {
                                            @RequestParam(value = "offset", required = true) String offset,
                                            @RequestParam(value = "limit", required = true) String limit) {
         try {
+            List<Book> books;
             if (author.equals("") && genre.equals("") && publisher.equals("")) {
                 if (title.equals(""))
                     return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"You must specify book title at least\" }");
-                else
-                    return searchByName(title);
-            }
-            List<Book> books = bookRepository.findByFilter(title, author, genre, publisher,
-                                                            (Integer.valueOf(limit)),
-                                                            (Integer.valueOf(offset) * Integer.valueOf(limit)));
+                else {
+                    books = searchByName(title, (Integer.parseInt(limit)),
+                            (Integer.parseInt(offset) * Integer.parseInt(limit)));
+                    if (books == null ){
+                        return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"There are a problem with title\" }");
+                    }
+                }
+            }else
+            books = bookRepository.findByFilter(title, author, genre, publisher,
+                                                            (Integer.parseInt(limit)),
+                                                            (Integer.parseInt(offset) * Integer.parseInt(limit)));
+
+            int num_books= bookRepository.countBooksSearched(title, author, genre, publisher);
+
             if (books.size() == 0)
                 return buildResponse(HttpStatus.NO_CONTENT, "{ \"message\": \"Couldn't find book with specified filters\" }");
 
-            return buildResponse(HttpStatus.OK, books);
+            return buildPaginatedResponse(HttpStatus.OK,
+                    convertToJsonSearched(Integer.valueOf(offset), Integer.valueOf(limit), books, num_books));
         } catch (Exception e) {
             return buildResponse(HttpStatus.CONFLICT, "{ \"message\": \"Couldn't find book, there was a conflict\" }");
         }
     }
 
 
-    private ResponseEntity searchByName(String title) {
-        List<Book> books = bookRepository.findByName(title);
-        if (books.size() == 0)
-            return buildResponse(HttpStatus.NO_CONTENT, "{ \"message\": \"Couldn't find book with name " + title + "\" }");
+    private List<Book> searchByName(String title, int offset, int limit) {
+        List<Book> books = bookRepository.findByName(title, limit, offset);
 
-        return buildResponse(HttpStatus.OK, books);
+        return books;
     }
 
 
@@ -144,13 +152,16 @@ public class BookController {
         return "{\"numBooks\": " + bookRepository.count() + ", \"page\": " + offset + ", \"size\": " + limit + ", \"books\": " + gson.toJson(books) + "}";
     }
 
+    private String convertToJsonSearched(int offset, int limit, List<Book> books, int num_books) {
+        Gson gson = new Gson();
+        return "{\"numBooks\": " + num_books + ", \"page\": " + offset + ", \"size\": " + limit + ", \"books\": " + gson.toJson(books) + "}";
+    }
 
     private Book store(@RequestBody Book book) {
         return bookRepository
                 .save(new Book(book.getTitle(), book.getAuthor(), book.getPublisher(), book.getPages(), book.getIsbn(),
                         book.getGenres(), book.getSynopsis()));
     }
-
 
     private HttpHeaders setHeaders() {
         HttpHeaders headers = new HttpHeaders();

@@ -132,6 +132,11 @@ public class BookListController {
             long list_id = jsonNode.findValue("list_id").asLong();
             String progressString = jsonNode.findValue("progress").asText();
 
+            UserList userList = userListRepository.findByListId(list_id);
+            if(userList.getList_name().equals("Finished")){
+                progressString = bookRepository.findById(book_id).get().getPages();
+            }
+
             Long progress = updateProgress(book_id, list_id, progressString);
 
             if (progress == null) {
