@@ -130,7 +130,7 @@ public class BookListController {
             JsonNode jsonNode = mapper.readTree(json);
             long book_id = jsonNode.findValue("book_id").asLong();
             long list_id = jsonNode.findValue("list_id").asLong();
-            String progressString = jsonNode.findValue("progress").asText();
+            String progressString = "0";
 
             UserList userList = userListRepository.findByListId(list_id);
             if(userList.getList_name().equals("Finished")){
